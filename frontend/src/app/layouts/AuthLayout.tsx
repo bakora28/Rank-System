@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Trophy } from 'lucide-react';
 import { CubeCluster } from '@/components/ui/CubeCluster';
+import logoFull from '@/assets/logo-full.png';
 
 export function AuthLayout() {
   return (
@@ -34,11 +34,8 @@ export function AuthLayout() {
             }}
           />
 
-          <a href="/login" className="relative z-10 flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white">
-              <Trophy className="size-4" />
-            </div>
-            <span className="text-base font-bold tracking-tight text-slate-800">RankSystem</span>
+          <a href="/login" className="relative z-10 flex items-center">
+            <img src={logoFull} alt="TeacherPlanet" className="h-16 w-auto" />
           </a>
 
           <div className="relative z-10 flex flex-1 items-center justify-center">

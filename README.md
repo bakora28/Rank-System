@@ -1,4 +1,4 @@
-# Rank System
+# TeacherPlanet
 
 A gamified book-purchase competition platform for schools. Teachers "buy" books from admin-curated categories, every approved purchase counts toward a live leaderboard, and top performers win real gifts.
 

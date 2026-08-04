@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
 import { Button } from '@/components/ui/Button';
-import { AuthSwitchLink } from '@/components/AuthSwitchLink';
 import { GoogleButton } from './GoogleButton';
 
 export default function Signup() {
@@ -49,9 +48,7 @@ export default function Signup() {
 
   return (
     <div>
-      <AuthSwitchLink question="Already have an account?" linkText="Log in" to="/login" />
-
-      <h2 className="mt-5 text-2xl font-bold text-slate-800">Create Account</h2>
+      <h2 className="text-2xl font-bold text-slate-800">Create Account</h2>
       <p className="mt-1 text-sm text-slate-500">Join as a teacher to start competing.</p>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
@@ -109,7 +106,14 @@ export default function Signup() {
         </Button>
       </form>
 
-      <div className="mt-8 flex flex-col items-center gap-3">
+      <p className="mt-4 text-center text-sm text-slate-500">
+        Already have an account?{' '}
+        <Link to="/login" className="font-semibold text-brand-600 hover:underline">
+          Log in
+        </Link>
+      </p>
+
+      <div className="mt-6 flex flex-col items-center gap-3">
         <span className="text-xs text-slate-400">Sign up with</span>
         <GoogleButton variant="circle" />
       </div>

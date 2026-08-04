@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { AlertCircle } from 'lucide-react';
@@ -9,7 +9,6 @@ import { roleHome } from '@/lib/roleHome';
 import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Button } from '@/components/ui/Button';
-import { AuthSwitchLink } from '@/components/AuthSwitchLink';
 import { GoogleButton } from './GoogleButton';
 
 export default function Login() {
@@ -42,9 +41,7 @@ export default function Login() {
 
   return (
     <div>
-      <AuthSwitchLink question="Don't have an account?" linkText="Sign up" to="/signup" />
-
-      <h2 className="mt-5 text-2xl font-bold text-slate-800">Welcome Back</h2>
+      <h2 className="text-2xl font-bold text-slate-800">Welcome Back</h2>
       <p className="mt-1 text-sm text-slate-500">Login your account.</p>
 
       {deactivated && (
@@ -103,7 +100,14 @@ export default function Login() {
         </Button>
       </form>
 
-      <div className="mt-8 flex flex-col items-center gap-3">
+      <p className="mt-4 text-center text-sm text-slate-500">
+        Don't have an account?{' '}
+        <Link to="/signup" className="font-semibold text-brand-600 hover:underline">
+          Sign up
+        </Link>
+      </p>
+
+      <div className="mt-6 flex flex-col items-center gap-3">
         <span className="text-xs text-slate-400">Login with</span>
         <GoogleButton variant="circle" />
       </div>

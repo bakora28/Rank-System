@@ -3,3 +3,7 @@ Thumbs.db
 .idea
 .vscode
 *.log
+
+# Raw source asset dropped at repo root — processed copies live in
+# frontend/src/assets/ and frontend/public/ instead.
+/logo (2).png

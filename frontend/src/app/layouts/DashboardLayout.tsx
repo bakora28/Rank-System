@@ -13,13 +13,13 @@ import {
   Gift,
   Menu,
   X,
-  Trophy as LogoIcon,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth';
 import { NotificationBell } from '@/features/notifications/NotificationBell';
 import { GlobalSearch } from '@/features/search/GlobalSearch';
 import { UserMenu } from '@/components/UserMenu';
 import type { Permission } from '@/types';
+import logoFull from '@/assets/logo-full.png';
 
 interface NavItem {
   label: string;
@@ -49,11 +49,8 @@ const ADMIN_NAV: NavItem[] = [
 function SidebarContent({ navItems, isTeacher, onNavigate }: { navItems: NavItem[]; isTeacher: boolean; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
-      <a href={isTeacher ? '/teacher' : '/admin'} className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-md shadow-brand-500/20">
-          <LogoIcon className="size-[18px]" />
-        </div>
-        <span className="text-lg font-bold tracking-tight text-slate-800">RankSystem</span>
+      <a href={isTeacher ? '/teacher' : '/admin'} className="flex items-center px-5 py-6">
+        <img src={logoFull} alt="TeacherPlanet" className="h-14 w-auto" />
       </a>
 
       <nav className="flex-1 space-y-1 px-3">
