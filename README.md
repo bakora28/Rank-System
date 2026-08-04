@@ -1,0 +1,122 @@
+# Rank System
+
+A gamified book-purchase competition platform for schools. Teachers "buy" books from admin-curated categories, every approved purchase counts toward a live leaderboard, and top performers win real gifts.
+
+- **Backend**: [`backend/`](backend) — Laravel 13 (PHP 8.3) REST API
+- **Frontend**: [`frontend/`](frontend) — React 19 + Vite + TypeScript SPA
+
+## Features
+
+**Teachers**
+- Sign up / log in with email+password or Google
+- Browse book categories, mark a book as "bought" (creates a pending request)
+- See a live top-10 leaderboard (day / month / year / all-time), plus their own position if outside the top 10
+- Track gifts won and progress toward the next automatic gift
+
+**Admin**
+- Full ordered ranking of every teacher by approved book purchases, with search
+- Approve or reject teachers' purchase requests, with search/filter by teacher, book, category, status, date
+- Full CRUD on categories (seeded: Science, Maths, Chemistry, Physics, Biology) and their books
+- Manage teacher accounts
+- Manage **assistants** — admin-created accounts with a granular, per-module permission matrix (view/add/edit/delete across categories, books, teachers, requests, gifts, notifications)
+- Manage **other admins** — full-access accounts, admin-only, self-deletion blocked
+- Manage gifts: iPhone & Smart Watch (manually awarded, criteria admin's choice), Smartboard (auto-awarded to the top teacher at year end), iPad (auto-awarded to the top teacher each term / 6 months) — every gift's criteria is editable
+- Notification bell for purchase-request activity
+
+**Assistants**
+- See the same admin dashboard, scoped to whichever permissions the admin granted them
+
+## Tech Stack
+
+| | |
+|---|---|
+| Backend | Laravel 13, PHP 8.3, MySQL |
+| Auth | Laravel Sanctum (SPA cookie auth) + Laravel Socialite (Google OAuth) |
+| RBAC | `spatie/laravel-permission` — `module.action` permission keys |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, Framer Motion |
+| Data fetching | TanStack Query, Axios |
+| State | Zustand |
+
+## Project Structure
+
+```
+backend/    Laravel API — routes/api.php, app/Http/Controllers, app/Models, app/Services
+frontend/   React SPA — src/features (pages by role), src/components/ui, src/api
+```
+
+## Getting Started
+
+### Prerequisites
+
+- PHP 8.3+ and Composer
+- Node 18+ and npm
+- MySQL (or MariaDB, e.g. via XAMPP)
+
+### Backend setup
+
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Edit `.env`:
+- Set `DB_*` to point at a MySQL database you've created (e.g. `rank_system`)
+- Set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` if you want Google login to work — create OAuth credentials at the [Google Cloud Console](https://console.cloud.google.com/apis/credentials), with authorized redirect URI `http://localhost:8000/auth/google/callback`
+
+Then:
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve
+```
+
+The API is now running at `http://localhost:8000`.
+
+To have gifts auto-award on schedule, run the scheduler (or invoke it manually):
+
+```bash
+php artisan app:award-periodic-gifts   # run once, or wire into `schedule:run` / a cron job
+```
+
+### Frontend setup
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The app is now running at `http://localhost:5173`.
+
+### Seeded demo accounts
+
+The database seeder creates:
+
+| Role | Email | Password |
+|---|---|---|
+| Teacher | `teacher@ranksystem.test` | `password` |
+
+No admin account is seeded by default — create one directly via `php artisan tinker`:
+
+```php
+$admin = \App\Models\User::create([
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => 'change-me',
+    'is_active' => true,
+]);
+$admin->assignRole('admin');
+```
+
+Every other admin, assistant, or teacher account can then be created from the admin dashboard (or via public self-signup, for teachers).
+
+## Notes
+
+- Public self-signup is teacher-only. Admin and assistant accounts are always created by an existing admin.
+- Assistant permissions are assigned individually (not role-shared), so two assistants can have completely different access.
+- Rank is computed live from approved purchase requests — not cached — filterable by day/month/year/all-time.
+- The app runs on `Africa/Cairo` time (`APP_TIMEZONE` in `backend/.env`), which drives the leaderboard's period boundaries and the gift-award scheduler's term/year windows.

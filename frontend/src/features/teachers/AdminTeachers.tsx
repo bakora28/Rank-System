@@ -1,0 +1,194 @@
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { Plus, Search, Trash2, UserRound } from 'lucide-react';
+import { toast } from 'sonner';
+import axios from 'axios';
+import { createTeacher, deleteTeacher, listTeachers, updateTeacher } from '@/api/teachers';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useAuthStore } from '@/store/auth';
+import { Card } from '@/components/ui/Card';
+import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Pagination } from '@/components/ui/Pagination';
+import type { Teacher } from '@/types';
+
+export default function AdminTeachers() {
+  const [params] = useSearchParams();
+  const [q, setQ] = useState(params.get('q') ?? '');
+  const [page, setPage] = useState(1);
+  const debouncedQ = useDebouncedValue(q, 300);
+  const { can } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['teachers', debouncedQ, page],
+    queryFn: () => listTeachers({ q: debouncedQ || undefined, page }),
+  });
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState('');
+  const [deleting, setDeleting] = useState<Teacher | null>(null);
+
+  const createMutation = useMutation({
+    mutationFn: () => createTeacher({ name, email, password }),
+    onSuccess: () => {
+      toast.success('Teacher added');
+      queryClient.invalidateQueries({ queryKey: ['teachers'] });
+      setModalOpen(false);
+      setName('');
+      setEmail('');
+      setPassword('');
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err) && err.response?.status === 422) {
+        setFormError(Object.values(err.response.data.errors as Record<string, string[]>)[0]?.[0] ?? 'Invalid data');
+      } else {
+        setFormError('Could not add teacher.');
+      }
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: (t: Teacher) => updateTeacher(t.id, { name: t.name, email: t.email, is_active: !t.is_active }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teachers'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteTeacher(id),
+    onSuccess: () => {
+      toast.success('Teacher removed');
+      queryClient.invalidateQueries({ queryKey: ['teachers'] });
+      setDeleting(null);
+    },
+  });
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Teachers</h1>
+          <p className="mt-1 text-sm text-slate-500">Every teacher taking part in the competition.</p>
+        </div>
+        {can('teachers.add') && (
+          <Button
+            onClick={() => {
+              setFormError('');
+              setModalOpen(true);
+            }}
+          >
+            <Plus className="size-4" /> Add Teacher
+          </Button>
+        )}
+      </div>
+
+      <Card className="mt-6 p-5">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <Search className="size-4 text-slate-400" />
+          <input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Search by name or email..."
+            className="w-full max-w-xs bg-transparent text-sm outline-none placeholder:text-slate-400"
+          />
+        </div>
+
+        {isLoading && <Spinner />}
+        {!isLoading && data && data.data.length === 0 && <EmptyState icon={<UserRound className="size-8" />} title="No teachers found" />}
+
+        <div className="flex flex-col gap-2">
+          {data?.data.map((teacher, i) => (
+            <motion.div
+              key={teacher.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03 }}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 px-4 py-3"
+            >
+              <div className="flex items-center gap-3">
+                <Avatar name={teacher.name} src={teacher.avatar} size={36} />
+                <div>
+                  <p className="text-sm font-medium text-slate-700">{teacher.name}</p>
+                  <p className="text-xs text-slate-400">{teacher.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge tone="success">{teacher.approved_count} approved</Badge>
+                {teacher.pending_count > 0 && <Badge tone="warning">{teacher.pending_count} pending</Badge>}
+                {can('teachers.edit') && (
+                  <button
+                    onClick={() => toggleActiveMutation.mutate(teacher)}
+                    className="cursor-pointer"
+                  >
+                    <Badge tone={teacher.is_active ? 'default' : 'danger'}>{teacher.is_active ? 'Active' : 'Deactivated'}</Badge>
+                  </button>
+                )}
+                {can('teachers.delete') && (
+                  <button onClick={() => setDeleting(teacher)} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-danger cursor-pointer">
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {data && <Pagination page={data.meta.current_page} lastPage={data.meta.last_page} onChange={setPage} />}
+      </Card>
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Add Teacher"
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              loading={createMutation.isPending}
+              disabled={!name.trim() || !email.trim() || password.length < 8}
+              onClick={() => createMutation.mutate()}
+            >
+              Create
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          {formError && <p className="text-sm text-danger">{formError}</p>}
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={!!deleting}
+        title="Remove teacher"
+        message={`Remove "${deleting?.name}" from the competition? This cannot be undone.`}
+        confirmLabel="Remove"
+        danger
+        loading={deleteMutation.isPending}
+        onConfirm={() => deleting && deleteMutation.mutate(deleting.id)}
+        onClose={() => setDeleting(null)}
+      />
+    </div>
+  );
+}
