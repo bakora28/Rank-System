@@ -17,8 +17,12 @@ export async function listPurchaseRequests(filters: RequestFilters = {}) {
   return data;
 }
 
-export async function markBookBought(bookId: number) {
-  const { data } = await api.post<{ data: PurchaseRequestItem }>('/purchase-requests', { book_id: bookId });
+export async function markBookBought(bookId: number, receipt: File, teacherNote?: string) {
+  const form = new FormData();
+  form.append('book_id', String(bookId));
+  form.append('receipt', receipt);
+  if (teacherNote) form.append('teacher_note', teacherNote);
+  const { data } = await api.post<{ data: PurchaseRequestItem }>('/purchase-requests', form);
   return data.data;
 }
 

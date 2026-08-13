@@ -63,11 +63,14 @@ export function GiftFormModal({ open, gift, loading, onClose, onSubmit }: Props)
             <option value="manual">Manual award</option>
             <option value="period_top1">Automatic — top 1 per period</option>
           </Select>
-          <Select label="Period" value={period} onChange={(e) => setPeriod(e.target.value as GiftPeriod)} disabled={criteriaType === 'manual'}>
-            <option value="none">None</option>
-            <option value="6_months">Every 6 months</option>
-            <option value="yearly">Yearly</option>
-          </Select>
+          <div>
+            <Select label="Period" value={period} onChange={(e) => setPeriod(e.target.value as GiftPeriod)}>
+              <option value="none">None</option>
+              <option value="6_months">Every 6 months</option>
+              <option value="yearly">Yearly</option>
+            </Select>
+            {criteriaType === 'manual' && <p className="mt-1 text-[11px] text-slate-400">Only used when Criteria is set to Automatic.</p>}
+          </div>
         </div>
 
         <label className="flex flex-col gap-1.5">

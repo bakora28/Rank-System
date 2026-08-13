@@ -23,6 +23,7 @@ class AuthController extends Controller
         $user = User::query()->create([
             'name' => $request->string('name'),
             'email' => $request->string('email'),
+            'phone' => $request->string('phone'),
             'password' => $request->string('password'),
             'is_active' => true,
         ]);

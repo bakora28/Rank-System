@@ -7,6 +7,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GiftController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\RankController;
 use App\Http\Controllers\SearchController;
@@ -19,6 +20,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar']);
 
     Route::get('/ranks', [RankController::class, 'index']);
     Route::get('/ranks/activity', [RankController::class, 'activity']);
@@ -38,6 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('permission:books.add')->post('/categories/{category}/books', [BookController::class, 'store']);
     Route::middleware('permission:books.edit')->put('/books/{book}', [BookController::class, 'update']);
+    Route::middleware('permission:books.edit')->post('/books/{book}/files', [BookController::class, 'uploadFiles']);
+    Route::middleware('permission:books.edit')->delete('/books/{book}/files/{file}', [BookController::class, 'destroyFile']);
     Route::middleware('permission:books.delete')->delete('/books/{book}', [BookController::class, 'destroy']);
 
     Route::middleware('permission:requests.view')->get('/purchase-requests', [PurchaseRequestController::class, 'index']);
@@ -56,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:gifts.delete')->delete('/gifts/{gift}', [GiftController::class, 'destroy']);
 
     Route::middleware('permission:teachers.view')->get('/teachers', [TeacherController::class, 'index']);
+    Route::middleware('permission:teachers.view')->get('/teachers/export', [TeacherController::class, 'export']);
     Route::middleware('permission:teachers.add')->post('/teachers', [TeacherController::class, 'store']);
     Route::middleware('permission:teachers.edit')->put('/teachers/{teacher}', [TeacherController::class, 'update']);
     Route::middleware('permission:teachers.delete')->delete('/teachers/{teacher}', [TeacherController::class, 'destroy']);

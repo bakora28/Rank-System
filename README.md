@@ -8,16 +8,18 @@ A gamified book-purchase competition platform for schools. Teachers "buy" books 
 ## Features
 
 **Teachers**
-- Sign up / log in with email+password or Google
-- Browse book categories, mark a book as "bought" (creates a pending request)
+- Sign up (with phone number) / log in with email+password or Google
+- Browse book categories — books can show cover images and attached PDFs uploaded by admin, viewable in a gallery
+- Mark a book as "bought": upload a purchase receipt (image or PDF) with an optional note, creating a pending request
 - See a live top-10 leaderboard (day / month / year / all-time), plus their own position if outside the top 10
 - Track gifts won and progress toward the next automatic gift
+- Self-service profile page: edit name, email, phone, password, and profile picture
 
 **Admin**
 - Full ordered ranking of every teacher by approved book purchases, with search
-- Approve or reject teachers' purchase requests, with search/filter by teacher, book, category, status, date
-- Full CRUD on categories (seeded: Science, Maths, Chemistry, Physics, Biology) and their books
-- Manage teacher accounts
+- Review purchase requests — view the teacher's uploaded receipt and note before approving or rejecting, with search/filter by teacher, book, category, status, date
+- Full CRUD on categories (seeded: Science, Maths, Chemistry, Physics, Biology) and their books, with multi-file image/PDF attachments per book
+- Manage teacher accounts (including phone numbers), with a one-click export of the full roster to an Excel (.xlsx) sheet
 - Manage **assistants** — admin-created accounts with a granular, per-module permission matrix (view/add/edit/delete across categories, books, teachers, requests, gifts, notifications)
 - Manage **other admins** — full-access accounts, admin-only, self-deletion blocked
 - Manage gifts: iPhone & Smart Watch (manually awarded, criteria admin's choice), Smartboard (auto-awarded to the top teacher at year end), iPad (auto-awarded to the top teacher each term / 6 months) — every gift's criteria is editable

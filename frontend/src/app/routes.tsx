@@ -12,6 +12,7 @@ import TeacherDashboard from '@/features/dashboard/TeacherDashboard';
 import TeacherCategories from '@/features/categories/TeacherCategories';
 import TeacherCategoryDetail from '@/features/categories/TeacherCategoryDetail';
 import TeacherGifts from '@/features/gifts/TeacherGifts';
+import ProfilePage from '@/features/profile/ProfilePage';
 
 import AdminDashboard from '@/features/dashboard/AdminDashboard';
 import AdminRanks from '@/features/ranks/AdminRanks';
@@ -76,6 +77,7 @@ export function AppRoutes() {
         <Route path="categories" element={<TeacherCategories />} />
         <Route path="categories/:id" element={<TeacherCategoryDetail />} />
         <Route path="gifts" element={<TeacherGifts />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       <Route
@@ -95,6 +97,7 @@ export function AppRoutes() {
         <Route path="assistants" element={<AdminAssistants />} />
         <Route path="admins" element={<AdminAdmins />} />
         <Route path="gifts" element={<AdminGifts />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       <Route path="/" element={<Navigate to={user ? roleHome(user.role) : '/login'} replace />} />

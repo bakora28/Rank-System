@@ -4,8 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
-class TeacherResource extends JsonResource
+class BookFileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,13 +17,10 @@ class TeacherResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'avatar' => $this->avatar,
-            'is_active' => $this->is_active,
-            'approved_count' => $this->approved_count,
-            'pending_count' => $this->pending_count,
+            'name' => $this->original_name,
+            'mime_type' => $this->mime_type,
+            'size' => $this->size,
+            'url' => Storage::disk('public')->url($this->path),
         ];
     }
 }

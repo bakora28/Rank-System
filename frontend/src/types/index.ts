@@ -15,6 +15,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
   avatar: string | null;
   is_active: boolean;
   role: Role;
@@ -31,12 +32,21 @@ export interface Category {
   created_at: string;
 }
 
+export interface BookFile {
+  id: number;
+  name: string;
+  mime_type: string;
+  size: number;
+  url: string;
+}
+
 export interface Book {
   id: number;
   name: string;
   category_id: number;
   category?: Category;
   my_status?: 'pending' | 'approved' | 'rejected' | null;
+  files?: BookFile[];
   created_at: string;
 }
 
@@ -46,6 +56,8 @@ export interface PurchaseRequestItem {
   id: number;
   status: PurchaseStatus;
   note: string | null;
+  teacher_note: string | null;
+  receipt_url: string | null;
   teacher: { id: number; name: string; avatar: string | null };
   book: { id: number; name: string; category: string };
   reviewer?: { id: number; name: string } | null;
@@ -105,6 +117,7 @@ export interface Teacher {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
   avatar: string | null;
   is_active: boolean;
   approved_count: number;
@@ -115,6 +128,7 @@ export interface Assistant {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
   avatar: string | null;
   is_active: boolean;
   permissions: Permission[];

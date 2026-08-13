@@ -19,7 +19,7 @@ class GiftResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'image_url' => $this->image_path ? \Illuminate\Support\Facades\Storage::url($this->image_path) : null,
+            'image_url' => $this->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path) : null,
             'criteria_type' => $this->criteria_type,
             'period' => $this->period,
             'is_active' => $this->is_active,

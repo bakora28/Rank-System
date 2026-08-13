@@ -2,11 +2,12 @@ import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
-import { ChevronDown, ChevronUp, LogOut } from 'lucide-react';
+import { ChevronDown, ChevronUp, LogOut, UserCog } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/api/auth';
 import { useAuthStore } from '@/store/auth';
 import { useClickOutside } from '@/hooks/useClickOutside';
+import { roleHome } from '@/lib/roleHome';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 
@@ -21,6 +22,11 @@ export function UserMenu({ variant = 'header' }: { variant?: 'header' | 'sidebar
   useClickOutside(ref, () => setOpen(false));
 
   if (!user) return null;
+
+  function handleProfile() {
+    setOpen(false);
+    navigate(`${roleHome(user!.role)}/profile`);
+  }
 
   async function handleLogout() {
     await logout();
@@ -46,8 +52,14 @@ export function UserMenu({ variant = 'header' }: { variant?: 'header' | 'sidebar
                 <p className="truncate text-xs text-slate-400">{user.email}</p>
               </div>
               <button
+                onClick={handleProfile}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-600 hover:bg-slate-50 cursor-pointer"
+              >
+                <UserCog className="size-4" /> My Profile
+              </button>
+              <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-danger hover:bg-red-50 cursor-pointer"
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-danger hover:bg-red-50 cursor-pointer"
               >
                 <LogOut className="size-4" /> Log out
               </button>
@@ -95,8 +107,14 @@ export function UserMenu({ variant = 'header' }: { variant?: 'header' | 'sidebar
               </Badge>
             </div>
             <button
+              onClick={handleProfile}
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-600 hover:bg-slate-50 cursor-pointer"
+            >
+              <UserCog className="size-4" /> My Profile
+            </button>
+            <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-danger hover:bg-red-50 cursor-pointer"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-danger hover:bg-red-50 cursor-pointer"
             >
               <LogOut className="size-4" /> Log out
             </button>

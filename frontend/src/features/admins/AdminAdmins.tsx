@@ -16,6 +16,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
 
 export default function AdminAdmins() {
   const [q, setQ] = useState('');
@@ -31,18 +32,20 @@ export default function AdminAdmins() {
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<AdminUser | null>(null);
 
   const createMutation = useMutation({
-    mutationFn: () => createAdmin({ name, email, password }),
+    mutationFn: () => createAdmin({ name, email, phone: phone || null, password }),
     onSuccess: () => {
       toast.success('Admin created');
       queryClient.invalidateQueries({ queryKey: ['admins'] });
       setCreateOpen(false);
       setName('');
       setEmail('');
+      setPhone('');
       setPassword('');
     },
     onError: (err) => {
@@ -126,7 +129,10 @@ export default function AdminAdmins() {
                     {admin.name}
                     {admin.is_self && <Badge tone="brand">You</Badge>}
                   </p>
-                  <p className="text-xs text-slate-400">{admin.email}</p>
+                  <p className="text-xs text-slate-400">
+                    {admin.email}
+                    {admin.phone && <span> · {admin.phone}</span>}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -158,7 +164,7 @@ export default function AdminAdmins() {
             <Button
               size="sm"
               loading={createMutation.isPending}
-              disabled={!name.trim() || !email.trim() || password.length < 8}
+              disabled={!name.trim() || !email.trim() || password.length < 8 || !isPhoneFieldValid(phone)}
               onClick={() => createMutation.mutate()}
             >
               Create
@@ -169,6 +175,7 @@ export default function AdminAdmins() {
         <div className="flex flex-col gap-4">
           <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <PhoneField value={phone} onChange={setPhone} />
           <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {formError && <p className="text-sm text-danger">{formError}</p>}
         </div>

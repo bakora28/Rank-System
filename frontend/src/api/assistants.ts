@@ -9,6 +9,7 @@ export async function listAssistants(params: { q?: string; page?: number } = {})
 export async function createAssistant(payload: {
   name: string;
   email: string;
+  phone?: string | null;
   password: string;
   permissions: Permission[];
 }) {
@@ -16,7 +17,7 @@ export async function createAssistant(payload: {
   return data.data;
 }
 
-export async function updateAssistant(id: number, payload: { name: string; email: string; is_active?: boolean }) {
+export async function updateAssistant(id: number, payload: { name: string; email: string; phone?: string | null; is_active?: boolean }) {
   const { data } = await api.put<{ data: Assistant }>(`/assistants/${id}`, payload);
   return data.data;
 }

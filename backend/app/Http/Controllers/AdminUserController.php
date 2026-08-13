@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\AdminUserResource;
 use App\Models\User;
+use App\Rules\EgyptianPhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -34,12 +35,14 @@ class AdminUserController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'password' => ['required', Password::min(8)],
         ]);
 
         $admin = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
             'is_active' => true,
         ]);
@@ -55,6 +58,7 @@ class AdminUserController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$admin->id],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'is_active' => ['boolean'],
         ]);
 

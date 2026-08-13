@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\AssistantResource;
 use App\Models\User;
+use App\Rules\EgyptianPhoneNumber;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
@@ -29,6 +30,7 @@ class AssistantController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'password' => ['required', Password::min(8)],
             'permissions' => ['array'],
             'permissions.*' => ['string', 'in:'.implode(',', Permissions::all())],
@@ -37,6 +39,7 @@ class AssistantController extends Controller
         $assistant = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
             'is_active' => true,
         ]);
@@ -53,6 +56,7 @@ class AssistantController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$assistant->id],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'is_active' => ['boolean'],
         ]);
 

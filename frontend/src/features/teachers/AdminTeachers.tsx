@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Search, Trash2, UserRound } from 'lucide-react';
+import { Download, Plus, Search, Trash2, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { createTeacher, deleteTeacher, listTeachers, updateTeacher } from '@/api/teachers';
+import { createTeacher, deleteTeacher, exportTeachers, listTeachers, updateTeacher } from '@/api/teachers';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAuthStore } from '@/store/auth';
 import { Card } from '@/components/ui/Card';
@@ -18,6 +18,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
 import type { Teacher } from '@/types';
 
 export default function AdminTeachers() {
@@ -36,18 +37,40 @@ export default function AdminTeachers() {
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<Teacher | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const blob = await exportTeachers();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `teachers-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Could not export teachers.');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const createMutation = useMutation({
-    mutationFn: () => createTeacher({ name, email, password }),
+    mutationFn: () => createTeacher({ name, email, phone: phone || null, password }),
     onSuccess: () => {
       toast.success('Teacher added');
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       setModalOpen(false);
       setName('');
       setEmail('');
+      setPhone('');
       setPassword('');
     },
     onError: (err) => {
@@ -82,16 +105,21 @@ export default function AdminTeachers() {
           <h1 className="text-2xl font-bold text-slate-800">Teachers</h1>
           <p className="mt-1 text-sm text-slate-500">Every teacher taking part in the competition.</p>
         </div>
-        {can('teachers.add') && (
-          <Button
-            onClick={() => {
-              setFormError('');
-              setModalOpen(true);
-            }}
-          >
-            <Plus className="size-4" /> Add Teacher
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" loading={exporting} onClick={handleExport}>
+            <Download className="size-4" /> Export to Excel
           </Button>
-        )}
+          {can('teachers.add') && (
+            <Button
+              onClick={() => {
+                setFormError('');
+                setModalOpen(true);
+              }}
+            >
+              <Plus className="size-4" /> Add Teacher
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card className="mt-6 p-5">
@@ -124,7 +152,10 @@ export default function AdminTeachers() {
                 <Avatar name={teacher.name} src={teacher.avatar} size={36} />
                 <div>
                   <p className="text-sm font-medium text-slate-700">{teacher.name}</p>
-                  <p className="text-xs text-slate-400">{teacher.email}</p>
+                  <p className="text-xs text-slate-400">
+                    {teacher.email}
+                    {teacher.phone && <span> · {teacher.phone}</span>}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -163,7 +194,7 @@ export default function AdminTeachers() {
             <Button
               size="sm"
               loading={createMutation.isPending}
-              disabled={!name.trim() || !email.trim() || password.length < 8}
+              disabled={!name.trim() || !email.trim() || password.length < 8 || !isPhoneFieldValid(phone)}
               onClick={() => createMutation.mutate()}
             >
               Create
@@ -174,6 +205,7 @@ export default function AdminTeachers() {
         <div className="flex flex-col gap-4">
           <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <PhoneField value={phone} onChange={setPhone} />
           <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {formError && <p className="text-sm text-danger">{formError}</p>}
         </div>

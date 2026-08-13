@@ -9,12 +9,14 @@ import { useAuthStore } from '@/store/auth';
 import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
+import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from './GoogleButton';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [error, setError] = useState('');
@@ -24,13 +26,14 @@ export default function Signup() {
 
   const confirmTouched = passwordConfirmation.length > 0;
   const passwordsMatch = password === passwordConfirmation;
+  const phoneValid = phone.length > 0 && isPhoneFieldValid(phone);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const user = await register(name, email, password, passwordConfirmation);
+      const user = await register(name, email, phone, password, passwordConfirmation);
       setUser(user);
       toast.success('Account created — welcome to the competition!');
       navigate('/teacher');
@@ -62,6 +65,7 @@ export default function Signup() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@school.edu"
         />
+        <PhoneField value={phone} onChange={setPhone} />
         <div className="flex flex-col gap-2">
           <PasswordInput
             label="Password"
@@ -101,7 +105,12 @@ export default function Signup() {
           </motion.p>
         )}
 
-        <Button type="submit" loading={loading} className="mt-1 w-full !rounded-full bg-gradient-to-r from-brand-600 to-violet-600 hover:brightness-105">
+        <Button
+          type="submit"
+          loading={loading}
+          disabled={!phoneValid}
+          className="mt-1 w-full !rounded-full bg-gradient-to-r from-brand-600 to-violet-600 hover:brightness-105"
+        >
           Create Account
         </Button>
       </form>

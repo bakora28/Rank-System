@@ -20,6 +20,7 @@ class BookResource extends JsonResource
             'category_id' => $this->category_id,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'my_status' => $this->whenLoaded('myRequest', fn () => $this->myRequest?->status),
+            'files' => BookFileResource::collection($this->whenLoaded('files')),
             'created_at' => $this->created_at,
         ];
     }

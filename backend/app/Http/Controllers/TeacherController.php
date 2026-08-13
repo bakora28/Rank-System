@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TeacherResource;
 use App\Models\User;
+use App\Rules\EgyptianPhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TeacherController extends Controller
 {
@@ -27,11 +30,42 @@ class TeacherController extends Controller
         return TeacherResource::collection($teachers);
     }
 
+    public function export()
+    {
+        $teachers = User::query()->role('teacher')->orderBy('name')->get(['name', 'email', 'phone']);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Teachers');
+
+        $sheet->fromArray(['Name', 'Email', 'Phone'], null, 'A1');
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($teachers as $teacher) {
+            $sheet->fromArray([$teacher->name, $teacher->email, $teacher->phone ?? ''], null, "A{$row}");
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $filename = 'teachers-'.now()->format('Y-m-d').'.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            (new Xlsx($spreadsheet))->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'password' => ['required', Password::min(8)],
         ]);
 
@@ -46,6 +80,7 @@ class TeacherController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$teacher->id],
+            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
             'is_active' => ['boolean'],
         ]);
 

@@ -9,6 +9,7 @@ use App\Notifications\NewPurchaseRequestNotification;
 use App\Notifications\PurchaseRequestReviewedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class PurchaseRequestController extends Controller
@@ -47,6 +48,8 @@ class PurchaseRequestController extends Controller
     {
         $data = $request->validate([
             'book_id' => ['required', 'exists:books,id'],
+            'receipt' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:5120'],
+            'teacher_note' => ['nullable', 'string', 'max:500'],
         ]);
 
         $exists = PurchaseRequest::query()
@@ -61,10 +64,14 @@ class PurchaseRequestController extends Controller
             ]);
         }
 
+        $receiptPath = $request->file('receipt')->store('receipts', 'public');
+
         $purchaseRequest = PurchaseRequest::query()->create([
             'teacher_id' => $request->user()->id,
             'book_id' => $data['book_id'],
             'status' => 'pending',
+            'receipt_path' => $receiptPath,
+            'teacher_note' => $data['teacher_note'] ?? null,
         ]);
         $purchaseRequest->load(['teacher', 'book.category']);
 

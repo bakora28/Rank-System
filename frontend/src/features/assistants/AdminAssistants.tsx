@@ -16,6 +16,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
 import { PermissionMatrix } from './PermissionMatrix';
 import type { Assistant, Permission } from '@/types';
 
@@ -33,6 +34,7 @@ export default function AdminAssistants() {
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [newPerms, setNewPerms] = useState<Permission[]>([]);
   const [formError, setFormError] = useState('');
@@ -42,13 +44,14 @@ export default function AdminAssistants() {
   const [deleting, setDeleting] = useState<Assistant | null>(null);
 
   const createMutation = useMutation({
-    mutationFn: () => createAssistant({ name, email, password, permissions: newPerms }),
+    mutationFn: () => createAssistant({ name, email, phone: phone || null, password, permissions: newPerms }),
     onSuccess: () => {
       toast.success('Assistant created');
       queryClient.invalidateQueries({ queryKey: ['assistants'] });
       setCreateOpen(false);
       setName('');
       setEmail('');
+      setPhone('');
       setPassword('');
       setNewPerms([]);
     },
@@ -127,7 +130,10 @@ export default function AdminAssistants() {
                 <Avatar name={assistant.name} src={assistant.avatar} size={36} />
                 <div>
                   <p className="text-sm font-medium text-slate-700">{assistant.name}</p>
-                  <p className="text-xs text-slate-400">{assistant.email}</p>
+                  <p className="text-xs text-slate-400">
+                    {assistant.email}
+                    {assistant.phone && <span> · {assistant.phone}</span>}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -166,7 +172,7 @@ export default function AdminAssistants() {
             <Button
               size="sm"
               loading={createMutation.isPending}
-              disabled={!name.trim() || !email.trim() || password.length < 8}
+              disabled={!name.trim() || !email.trim() || password.length < 8 || !isPhoneFieldValid(phone)}
               onClick={() => createMutation.mutate()}
             >
               Create
@@ -179,6 +185,7 @@ export default function AdminAssistants() {
             <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
             <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
+          <PhoneField value={phone} onChange={setPhone} />
           <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {formError && <p className="text-sm text-danger">{formError}</p>}
           <div>

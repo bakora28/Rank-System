@@ -31,4 +31,9 @@ class Book extends Model
     {
         return $this->hasOne(PurchaseRequest::class)->where('teacher_id', auth()->id());
     }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(BookFile::class);
+    }
 }

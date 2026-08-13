@@ -18,6 +18,7 @@ class AdminUserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'avatar' => $this->avatar,
             'is_active' => $this->is_active,
             'is_self' => $this->id === $request->user()->id,

@@ -18,6 +18,7 @@ class AssistantResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'avatar' => $this->avatar,
             'is_active' => $this->is_active,
             'permissions' => $this->getDirectPermissions()->pluck('name')->values(),
