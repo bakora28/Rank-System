@@ -37,6 +37,16 @@ class RankController extends Controller
 
         $teachersQuery = User::query()->role('teacher');
 
+        // Teachers only ever see the leaderboard for their own subject. Admin/assistant
+        // callers pass `subject` explicitly (e.g. to render separate Maths/Science tables).
+        $subject = $request->user()->hasRole('teacher')
+            ? $request->user()->subject
+            : $request->string('subject')->value();
+
+        if ($subject) {
+            $teachersQuery->where('subject', $subject);
+        }
+
         if ($scope === 'full' && $request->filled('q')) {
             $teachersQuery->where('name', 'like', '%'.$request->string('q').'%');
         }

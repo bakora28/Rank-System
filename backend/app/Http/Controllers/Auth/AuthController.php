@@ -24,6 +24,7 @@ class AuthController extends Controller
             'name' => $request->string('name'),
             'email' => $request->string('email'),
             'phone' => $request->string('phone'),
+            'subject' => $request->string('subject'),
             'password' => $request->string('password'),
             'is_active' => true,
         ]);

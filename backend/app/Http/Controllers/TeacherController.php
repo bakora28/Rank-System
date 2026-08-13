@@ -24,6 +24,7 @@ class TeacherController extends Controller
         }));
 
         $query->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')));
+        $query->when($request->filled('subject'), fn ($q) => $q->where('subject', $request->string('subject')));
 
         $teachers = $query->orderBy('name')->paginate($request->integer('per_page', 20));
 
@@ -66,6 +67,7 @@ class TeacherController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
+            'subject' => ['required', 'in:maths,science'],
             'password' => ['required', Password::min(8)],
         ]);
 
@@ -80,8 +82,9 @@ class TeacherController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$teacher->id],
-            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
-            'is_active' => ['boolean'],
+            'phone' => ['sometimes', 'nullable', 'string', new EgyptianPhoneNumber],
+            'subject' => ['sometimes', 'nullable', 'in:maths,science'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         $teacher->update($data);

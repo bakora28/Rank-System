@@ -18,26 +18,33 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { Select } from '@/components/ui/Select';
 import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
-import type { Teacher } from '@/types';
+import { SubjectPicker } from '@/components/ui/SubjectPicker';
+import type { Subject, Teacher } from '@/types';
+
+const SUBJECT_LABEL: Record<Subject, string> = { maths: 'Maths', science: 'Science' };
+const SUBJECT_TONE: Record<Subject, 'brand' | 'success'> = { maths: 'brand', science: 'success' };
 
 export default function AdminTeachers() {
   const [params] = useSearchParams();
   const [q, setQ] = useState(params.get('q') ?? '');
+  const [subjectFilter, setSubjectFilter] = useState<Subject | ''>('');
   const [page, setPage] = useState(1);
   const debouncedQ = useDebouncedValue(q, 300);
   const { can } = useAuthStore();
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['teachers', debouncedQ, page],
-    queryFn: () => listTeachers({ q: debouncedQ || undefined, page }),
+    queryKey: ['teachers', debouncedQ, subjectFilter, page],
+    queryFn: () => listTeachers({ q: debouncedQ || undefined, subject: subjectFilter || undefined, page }),
   });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState<Subject | null>(null);
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<Teacher | null>(null);
@@ -63,7 +70,7 @@ export default function AdminTeachers() {
   }
 
   const createMutation = useMutation({
-    mutationFn: () => createTeacher({ name, email, phone: phone || null, password }),
+    mutationFn: () => createTeacher({ name, email, phone: phone || null, subject: subject!, password }),
     onSuccess: () => {
       toast.success('Teacher added');
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
@@ -71,6 +78,7 @@ export default function AdminTeachers() {
       setName('');
       setEmail('');
       setPhone('');
+      setSubject(null);
       setPassword('');
     },
     onError: (err) => {
@@ -123,17 +131,30 @@ export default function AdminTeachers() {
       </div>
 
       <Card className="mt-6 p-5">
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-          <Search className="size-4 text-slate-400" />
-          <input
-            value={q}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <Search className="size-4 text-slate-400" />
+            <input
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search by name or email..."
+              className="w-full max-w-xs bg-transparent text-sm outline-none placeholder:text-slate-400"
+            />
+          </div>
+          <Select
+            value={subjectFilter}
             onChange={(e) => {
-              setQ(e.target.value);
+              setSubjectFilter(e.target.value as Subject | '');
               setPage(1);
             }}
-            placeholder="Search by name or email..."
-            className="w-full max-w-xs bg-transparent text-sm outline-none placeholder:text-slate-400"
-          />
+          >
+            <option value="">All subjects</option>
+            <option value="maths">Maths</option>
+            <option value="science">Science</option>
+          </Select>
         </div>
 
         {isLoading && <Spinner />}
@@ -159,6 +180,7 @@ export default function AdminTeachers() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {teacher.subject && <Badge tone={SUBJECT_TONE[teacher.subject]}>{SUBJECT_LABEL[teacher.subject]}</Badge>}
                 <Badge tone="success">{teacher.approved_count} approved</Badge>
                 {teacher.pending_count > 0 && <Badge tone="warning">{teacher.pending_count} pending</Badge>}
                 {can('teachers.edit') && (
@@ -194,7 +216,7 @@ export default function AdminTeachers() {
             <Button
               size="sm"
               loading={createMutation.isPending}
-              disabled={!name.trim() || !email.trim() || password.length < 8 || !isPhoneFieldValid(phone)}
+              disabled={!name.trim() || !email.trim() || password.length < 8 || !isPhoneFieldValid(phone) || !subject}
               onClick={() => createMutation.mutate()}
             >
               Create
@@ -206,6 +228,7 @@ export default function AdminTeachers() {
           <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <PhoneField value={phone} onChange={setPhone} />
+          <SubjectPicker value={subject} onChange={setSubject} />
           <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {formError && <p className="text-sm text-danger">{formError}</p>}
         </div>

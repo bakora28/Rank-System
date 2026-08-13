@@ -9,10 +9,11 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $categories = Category::query()
             ->withCount('books')
+            ->when($request->filled('subject'), fn ($q) => $q->where('subject', $request->string('subject')))
             ->orderBy('name')
             ->get();
 
@@ -23,12 +24,14 @@ class CategoryController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
+            'subject' => ['required', 'in:maths,science'],
             'color' => ['nullable', 'string', 'max:20'],
         ]);
 
         $category = Category::query()->create([
             'name' => $data['name'],
             'slug' => Str::slug($data['name']),
+            'subject' => $data['subject'],
             'color' => $data['color'] ?? '#2f8fe0',
             'created_by' => $request->user()->id,
         ]);
@@ -45,12 +48,14 @@ class CategoryController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name,'.$category->id],
+            'subject' => ['required', 'in:maths,science'],
             'color' => ['nullable', 'string', 'max:20'],
         ]);
 
         $category->update([
             'name' => $data['name'],
             'slug' => Str::slug($data['name']),
+            'subject' => $data['subject'],
             'color' => $data['color'] ?? $category->color,
         ]);
 

@@ -15,17 +15,17 @@ class CategoriesAndBooksSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Science' => ['#2f8fe0', ['Campbell Biology', 'Cosmos', 'A Brief History of Time']],
-            'Maths' => ['#8e44ad', ['Calculus Made Easy', 'Introduction to Algebra', 'Elements of Geometry']],
-            'Chemistry' => ['#27ae60', ['General Chemistry', 'Organic Chemistry', 'Chemistry: The Central Science']],
-            'Physics' => ['#e67e22', ['University Physics', 'Six Easy Pieces', 'Physics for Scientists and Engineers']],
-            'Biology' => ['#16a085', ['Molecular Biology of the Cell', 'Life: The Science of Biology', 'Genetics: Analysis and Principles']],
+            'General Science' => ['science', '#2f8fe0', ['Campbell Biology', 'Cosmos', 'A Brief History of Time']],
+            'Maths' => ['maths', '#8e44ad', ['Calculus Made Easy', 'Introduction to Algebra', 'Elements of Geometry']],
+            'Chemistry' => ['science', '#27ae60', ['General Chemistry', 'Organic Chemistry', 'Chemistry: The Central Science']],
+            'Physics' => ['science', '#e67e22', ['University Physics', 'Six Easy Pieces', 'Physics for Scientists and Engineers']],
+            'Biology' => ['science', '#16a085', ['Molecular Biology of the Cell', 'Life: The Science of Biology', 'Genetics: Analysis and Principles']],
         ];
 
-        foreach ($categories as $name => [$color, $books]) {
+        foreach ($categories as $name => [$subject, $color, $books]) {
             $category = Category::query()->firstOrCreate(
                 ['slug' => Str::slug($name)],
-                ['name' => $name, 'color' => $color]
+                ['name' => $name, 'subject' => $subject, 'color' => $color]
             );
 
             foreach ($books as $bookName) {

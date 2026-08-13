@@ -10,13 +10,16 @@ import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
 import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
+import { SubjectPicker } from '@/components/ui/SubjectPicker';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from './GoogleButton';
+import type { Subject } from '@/types';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState<Subject | null>(null);
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [error, setError] = useState('');
@@ -30,10 +33,11 @@ export default function Signup() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!subject) return;
     setError('');
     setLoading(true);
     try {
-      const user = await register(name, email, phone, password, passwordConfirmation);
+      const user = await register(name, email, phone, subject, password, passwordConfirmation);
       setUser(user);
       toast.success('Account created — welcome to the competition!');
       navigate('/teacher');
@@ -66,6 +70,7 @@ export default function Signup() {
           placeholder="you@school.edu"
         />
         <PhoneField value={phone} onChange={setPhone} />
+        <SubjectPicker value={subject} onChange={setSubject} />
         <div className="flex flex-col gap-2">
           <PasswordInput
             label="Password"
@@ -108,7 +113,7 @@ export default function Signup() {
         <Button
           type="submit"
           loading={loading}
-          disabled={!phoneValid}
+          disabled={!phoneValid || !subject}
           className="mt-1 w-full !rounded-full bg-gradient-to-r from-brand-600 to-violet-600 hover:brightness-105"
         >
           Create Account

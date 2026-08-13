@@ -31,42 +31,57 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
   const pdfs = book.files?.filter((f) => isPdf(f.mime_type)) ?? [];
   const cover = images[0];
   const hasFiles = images.length > 0 || pdfs.length > 0;
+  const color = book.category?.color ?? '#2f8fe0';
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      disabled={!hasFiles}
-      className="group relative block aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-brand-50 to-violet-50 disabled:cursor-default"
-    >
-      {cover ? (
-        <img
-          src={cover.url}
-          alt={book.name}
-          className="h-full w-full object-cover transition-transform duration-300 group-enabled:group-hover:scale-105"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <BookOpen className="size-10 text-brand-200" />
-        </div>
-      )}
+    <div className="flex aspect-[4/3] w-full">
+      {/* Spine */}
+      <div
+        className="relative w-3.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,rgba(0,0,0,0.12)_0px,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_4px)]"
+        style={{ background: `color-mix(in srgb, ${color} 65%, #0f172a)` }}
+      />
 
-      {hasFiles && (
-        <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/10" />
-      )}
+      {/* Cover */}
+      <button
+        type="button"
+        onClick={onOpen}
+        disabled={!hasFiles}
+        className="group relative block flex-1 overflow-hidden shadow-inner disabled:cursor-default"
+      >
+        {cover ? (
+          <img
+            src={cover.url}
+            alt={book.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-enabled:group-hover:scale-105"
+          />
+        ) : (
+          <div
+            className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"
+            style={{ background: `linear-gradient(150deg, ${color}, color-mix(in srgb, ${color} 55%, #0f172a))` }}
+          >
+            <BookOpen className="size-7 text-white/60" />
+            <p className="line-clamp-3 font-serif text-sm font-semibold leading-snug text-white/90">{book.name}</p>
+          </div>
+        )}
 
-      {images.length > 1 && (
-        <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
-          +{images.length - 1}
-        </span>
-      )}
+        {hasFiles && <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/10" />}
 
-      {pdfs.length > 0 && (
-        <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm">
-          <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length} PDFs` : 'PDF'}
-        </span>
-      )}
-    </button>
+        {images.length > 1 && (
+          <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
+            +{images.length - 1}
+          </span>
+        )}
+
+        {pdfs.length > 0 && (
+          <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm">
+            <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length} PDFs` : 'PDF'}
+          </span>
+        )}
+      </button>
+
+      {/* Page edge */}
+      <div className="w-1.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,#e2e8f0_0px,#e2e8f0_2px,#f8fafc_2px,#f8fafc_3px)]" />
+    </div>
   );
 }
 
@@ -299,7 +314,7 @@ export default function TeacherCategoryDetail() {
           const Icon = meta?.icon;
           return (
             <motion.div key={book.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <Card className="flex flex-col overflow-hidden">
+              <Card className="flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover">
                 <BookCover book={book} onOpen={() => setViewing(book)} />
                 <div className="flex items-center justify-between gap-3 p-4">
                   <div className="min-w-0">

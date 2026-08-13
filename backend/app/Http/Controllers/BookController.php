@@ -17,6 +17,7 @@ class BookController extends Controller
             ->with(array_filter([
                 $request->user()->hasRole('teacher') ? 'myRequest' : null,
                 'files',
+                'category',
             ]))
             ->orderBy('name')
             ->get();
@@ -39,7 +40,7 @@ class BookController extends Controller
 
         $this->storeFiles($book, $request->file('images', []));
 
-        return new BookResource($book->load('files'));
+        return new BookResource($book->load(['files', 'category']));
     }
 
     public function update(Request $request, Book $book)

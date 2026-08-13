@@ -18,6 +18,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$user->id],
             'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
+            'subject' => ['sometimes', 'nullable', 'in:maths,science'],
         ]);
 
         $user->update($data);

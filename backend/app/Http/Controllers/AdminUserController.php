@@ -58,8 +58,8 @@ class AdminUserController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$admin->id],
-            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
-            'is_active' => ['boolean'],
+            'phone' => ['sometimes', 'nullable', 'string', new EgyptianPhoneNumber],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         if ($admin->id === $request->user()->id && $request->has('is_active') && ! $request->boolean('is_active')) {

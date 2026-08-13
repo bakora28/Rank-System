@@ -32,6 +32,7 @@ interface NavItem {
 const TEACHER_NAV: NavItem[] = [
   { label: 'Dashboard', to: '/teacher', icon: LayoutDashboard },
   { label: 'Categories', to: '/teacher/categories', icon: BookOpen },
+  { label: 'My Requests', to: '/teacher/requests', icon: ClipboardList },
   { label: 'Gifts', to: '/teacher/gifts', icon: Gift },
 ];
 

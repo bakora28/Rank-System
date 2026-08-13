@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'slug', 'color', 'created_by'])]
+#[Fillable(['name', 'slug', 'color', 'subject', 'created_by'])]
 class Category extends Model
 {
     public function books(): HasMany

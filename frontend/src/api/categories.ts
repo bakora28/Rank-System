@@ -1,17 +1,17 @@
 import { api } from './client';
-import type { Book, Category } from '@/types';
+import type { Book, Category, Subject } from '@/types';
 
-export async function listCategories() {
-  const { data } = await api.get<{ data: Category[] }>('/categories');
+export async function listCategories(params: { subject?: Subject } = {}) {
+  const { data } = await api.get<{ data: Category[] }>('/categories', { params });
   return data.data;
 }
 
-export async function createCategory(payload: { name: string; color?: string }) {
+export async function createCategory(payload: { name: string; subject: Subject; color?: string }) {
   const { data } = await api.post<{ data: Category }>('/categories', payload);
   return data.data;
 }
 
-export async function updateCategory(id: number, payload: { name: string; color?: string }) {
+export async function updateCategory(id: number, payload: { name: string; subject: Subject; color?: string }) {
   const { data } = await api.put<{ data: Category }>(`/categories/${id}`, payload);
   return data.data;
 }

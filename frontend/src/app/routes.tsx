@@ -11,6 +11,7 @@ import AuthCallback from '@/features/auth/AuthCallback';
 import TeacherDashboard from '@/features/dashboard/TeacherDashboard';
 import TeacherCategories from '@/features/categories/TeacherCategories';
 import TeacherCategoryDetail from '@/features/categories/TeacherCategoryDetail';
+import TeacherRequests from '@/features/requests/TeacherRequests';
 import TeacherGifts from '@/features/gifts/TeacherGifts';
 import ProfilePage from '@/features/profile/ProfilePage';
 
@@ -76,6 +77,7 @@ export function AppRoutes() {
         <Route index element={<TeacherDashboard />} />
         <Route path="categories" element={<TeacherCategories />} />
         <Route path="categories/:id" element={<TeacherCategoryDetail />} />
+        <Route path="requests" element={<TeacherRequests />} />
         <Route path="gifts" element={<TeacherGifts />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>

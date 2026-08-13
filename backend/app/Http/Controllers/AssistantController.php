@@ -56,8 +56,8 @@ class AssistantController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,'.$assistant->id],
-            'phone' => ['nullable', 'string', new EgyptianPhoneNumber],
-            'is_active' => ['boolean'],
+            'phone' => ['sometimes', 'nullable', 'string', new EgyptianPhoneNumber],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         $assistant->update($data);

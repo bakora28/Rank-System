@@ -1,7 +1,7 @@
 import { api } from './client';
-import type { User } from '@/types';
+import type { Subject, User } from '@/types';
 
-export async function updateProfile(payload: { name: string; email: string; phone: string | null }) {
+export async function updateProfile(payload: { name: string; email: string; phone: string | null; subject?: Subject }) {
   const { data } = await api.put<{ data: User }>('/profile', payload);
   return data.data;
 }

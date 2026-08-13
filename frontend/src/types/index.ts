@@ -1,5 +1,7 @@
 export type Role = 'admin' | 'teacher' | 'assistant';
 
+export type Subject = 'maths' | 'science';
+
 export type Permission =
   | 'categories.view' | 'categories.add' | 'categories.edit' | 'categories.delete'
   | 'books.view' | 'books.add' | 'books.edit' | 'books.delete'
@@ -16,6 +18,7 @@ export interface User {
   name: string;
   email: string;
   phone: string | null;
+  subject: Subject | null;
   avatar: string | null;
   is_active: boolean;
   role: Role;
@@ -27,6 +30,7 @@ export interface Category {
   id: number;
   name: string;
   slug: string;
+  subject: Subject;
   color: string;
   books_count?: number;
   created_at: string;
@@ -118,6 +122,7 @@ export interface Teacher {
   name: string;
   email: string;
   phone: string | null;
+  subject: Subject | null;
   avatar: string | null;
   is_active: boolean;
   approved_count: number;

@@ -12,7 +12,9 @@ import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
 import { PhoneField, isPhoneFieldValid } from '@/components/ui/PhoneField';
+import { SubjectPicker } from '@/components/ui/SubjectPicker';
 import { Button } from '@/components/ui/Button';
+import type { Subject } from '@/types';
 
 function firstError(err: unknown, fallback: string) {
   if (axios.isAxiosError(err) && err.response?.status === 422) {
@@ -29,6 +31,7 @@ export default function ProfilePage() {
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
+  const [subject, setSubject] = useState<Subject | null>(user?.subject ?? null);
   const [infoError, setInfoError] = useState('');
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -36,12 +39,14 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
+  const isTeacher = user?.role === 'teacher';
   const phoneValid = isPhoneFieldValid(phone);
+  const subjectValid = !isTeacher || !!subject;
   const confirmTouched = confirmPassword.length > 0;
   const passwordsMatch = newPassword === confirmPassword;
 
   const infoMutation = useMutation({
-    mutationFn: () => updateProfile({ name, email, phone: phone || null }),
+    mutationFn: () => updateProfile({ name, email, phone: phone || null, ...(isTeacher && subject ? { subject } : {}) }),
     onSuccess: (updated) => {
       setUser(updated);
       toast.success('Profile updated');
@@ -74,7 +79,7 @@ export default function ProfilePage() {
 
   function handleInfoSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!phoneValid) return;
+    if (!phoneValid || !subjectValid) return;
     infoMutation.mutate();
   }
 
@@ -127,6 +132,13 @@ export default function ProfilePage() {
             <Input label="Full name" required value={name} onChange={(e) => setName(e.target.value)} />
             <Input label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             <PhoneField value={phone} onChange={setPhone} />
+            {isTeacher && (
+              <SubjectPicker
+                value={subject}
+                onChange={setSubject}
+                label={subject ? 'Subject' : 'Subject — choose yours to appear on the leaderboard'}
+              />
+            )}
 
             {infoError && (
               <p className="flex items-center gap-1.5 text-sm text-danger">
@@ -134,7 +146,7 @@ export default function ProfilePage() {
               </p>
             )}
 
-            <Button type="submit" loading={infoMutation.isPending} disabled={!phoneValid} className="self-start">
+            <Button type="submit" loading={infoMutation.isPending} disabled={!phoneValid || !subjectValid} className="self-start">
               Save changes
             </Button>
           </form>

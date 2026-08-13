@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { FullRanksResponse, RanksResponse } from '@/types';
+import type { FullRanksResponse, RanksResponse, Subject } from '@/types';
 
 export type Period = 'day' | 'month' | 'year' | 'all';
 
@@ -8,9 +8,9 @@ export async function fetchTop10(period: Period) {
   return data;
 }
 
-export async function fetchFullRanks(period: Period, q = '', page = 1) {
+export async function fetchFullRanks(period: Period, q = '', page = 1, subject?: Subject) {
   const { data } = await api.get<FullRanksResponse>('/ranks', {
-    params: { period, scope: 'full', q: q || undefined, page },
+    params: { period, scope: 'full', q: q || undefined, page, subject },
   });
   return data;
 }
