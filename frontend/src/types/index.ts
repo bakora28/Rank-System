@@ -129,6 +129,14 @@ export interface Teacher {
   pending_count: number;
 }
 
+export interface WhatsappAccount {
+  id: number;
+  label: string;
+  instance_id: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface Assistant {
   id: number;
   name: string;

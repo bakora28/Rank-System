@@ -24,6 +24,7 @@ import AdminTeachers from '@/features/teachers/AdminTeachers';
 import AdminAssistants from '@/features/assistants/AdminAssistants';
 import AdminAdmins from '@/features/admins/AdminAdmins';
 import AdminGifts from '@/features/gifts/AdminGifts';
+import AdminWhatsApp from '@/features/whatsapp/AdminWhatsApp';
 
 function GuestOnly({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -99,6 +100,7 @@ export function AppRoutes() {
         <Route path="assistants" element={<AdminAssistants />} />
         <Route path="admins" element={<AdminAdmins />} />
         <Route path="gifts" element={<AdminGifts />} />
+        <Route path="whatsapp" element={<AdminWhatsApp />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
 

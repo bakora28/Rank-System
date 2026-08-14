@@ -28,21 +28,26 @@ export function GiftCard({ gift, index = 0, actions }: { gift: Gift; index?: num
     >
       <Card className="relative overflow-hidden p-0 transition-shadow hover:shadow-card-hover">
         <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700">
-          <motion.div
-            className="absolute inset-0 opacity-30"
-            animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
-            transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror' }}
-            style={{
-              backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent 40%)',
-              backgroundSize: '200% 200%',
-            }}
-          />
           {gift.image_url ? (
-            <img src={gift.image_url} alt={gift.name} className="h-24 w-24 rounded-2xl bg-white/10 object-contain p-2 drop-shadow-lg" />
+            <>
+              <img src={gift.image_url} alt={gift.name} className="absolute inset-0 h-full w-full object-cover object-top" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-black/10" />
+            </>
           ) : (
-            <div className="flex size-20 items-center justify-center rounded-2xl bg-white/15 text-white backdrop-blur">
-              <GiftIcon className="size-10" />
-            </div>
+            <>
+              <motion.div
+                className="absolute inset-0 opacity-30"
+                animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
+                transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror' }}
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent 40%)',
+                  backgroundSize: '200% 200%',
+                }}
+              />
+              <div className="flex size-20 items-center justify-center rounded-2xl bg-white/15 text-white backdrop-blur">
+                <GiftIcon className="size-10" />
+              </div>
+            </>
           )}
           <Badge className="absolute left-3 top-3 bg-white/90 text-slate-700">
             {gift.criteria_type === 'period_top1' ? <Repeat className="size-3" /> : <Sparkles className="size-3" />}

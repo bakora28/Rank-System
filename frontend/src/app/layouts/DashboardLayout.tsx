@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Crown,
   Gift,
+  MessageCircle,
   Menu,
   X,
 } from 'lucide-react';
@@ -45,6 +46,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Assistants', to: '/admin/assistants', icon: ShieldCheck, adminOnly: true },
   { label: 'Admins', to: '/admin/admins', icon: Crown, adminOnly: true },
   { label: 'Gifts', to: '/admin/gifts', icon: Gift, permission: 'gifts.view' },
+  { label: 'WhatsApp', to: '/admin/whatsapp', icon: MessageCircle, adminOnly: true },
 ];
 
 function SidebarContent({ navItems, isTeacher, onNavigate }: { navItems: NavItem[]; isTeacher: boolean; onNavigate?: () => void }) {

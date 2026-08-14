@@ -37,7 +37,7 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
     <div className="flex aspect-[4/3] w-full">
       {/* Spine */}
       <div
-        className="relative w-3.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,rgba(0,0,0,0.12)_0px,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_4px)]"
+        className="relative w-3.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,rgba(0,0,0,0.12)_0px,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_4px)] shadow-[inset_-3px_0_4px_rgba(0,0,0,0.25)]"
         style={{ background: `color-mix(in srgb, ${color} 65%, #0f172a)` }}
       />
 
@@ -46,14 +46,19 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
         type="button"
         onClick={onOpen}
         disabled={!hasFiles}
-        className="group relative block flex-1 overflow-hidden shadow-inner disabled:cursor-default"
+        className="group relative block flex-1 overflow-hidden shadow-[inset_3px_0_6px_rgba(0,0,0,0.15)] disabled:cursor-default"
       >
         {cover ? (
-          <img
-            src={cover.url}
-            alt={book.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-enabled:group-hover:scale-105"
-          />
+          <>
+            <img
+              src={cover.url}
+              alt={book.name}
+              className="h-full w-full object-cover object-top transition-transform duration-300 group-enabled:group-hover:scale-105"
+            />
+            {/* Subtle depth + glossy-cover finish */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/10" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.22)_0%,transparent_28%)]" />
+          </>
         ) : (
           <div
             className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"

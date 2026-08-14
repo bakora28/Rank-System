@@ -12,6 +12,8 @@ use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\RankController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\WhatsappAccountController;
+use App\Http\Controllers\WhatsappMessageController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::middleware('permission:notifications.add')->post('/notifications/broadcast', [NotificationController::class, 'broadcast']);
 
     Route::middleware('permission:categories.view')->group(function () {
         Route::get('/categories', [CategoryController::class, 'index']);
@@ -80,6 +83,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admins', [AdminUserController::class, 'store']);
         Route::put('/admins/{admin}', [AdminUserController::class, 'update']);
         Route::delete('/admins/{admin}', [AdminUserController::class, 'destroy']);
+
+        // WhatsApp automation holds live send credentials — admin-only, never delegable.
+        Route::get('/whatsapp/accounts', [WhatsappAccountController::class, 'index']);
+        Route::post('/whatsapp/accounts', [WhatsappAccountController::class, 'store']);
+        Route::get('/whatsapp/accounts/{whatsappAccount}/qrcode', [WhatsappAccountController::class, 'qrcode']);
+        Route::put('/whatsapp/accounts/{whatsappAccount}', [WhatsappAccountController::class, 'update']);
+        Route::delete('/whatsapp/accounts/{whatsappAccount}', [WhatsappAccountController::class, 'destroy']);
+        Route::post('/whatsapp/send', [WhatsappMessageController::class, 'send']);
     });
 
     Route::middleware('role:admin|assistant')->get('/search', [SearchController::class, 'index']);

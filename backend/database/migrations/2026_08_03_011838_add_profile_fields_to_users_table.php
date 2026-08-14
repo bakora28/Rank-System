@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -18,7 +17,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->after('avatar');
         });
 
-        DB::statement('ALTER TABLE users MODIFY password VARCHAR(255) NULL');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('password')->nullable()->change();
+        });
     }
 
     /**
@@ -30,6 +31,8 @@ return new class extends Migration
             $table->dropColumn(['google_id', 'avatar', 'is_active']);
         });
 
-        DB::statement('ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('password')->nullable(false)->change();
+        });
     }
 };
