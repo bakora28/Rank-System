@@ -6,12 +6,7 @@ export async function listWhatsappAccounts() {
   return data.data;
 }
 
-export async function fetchNewWhatsappInstanceId() {
-  const { data } = await api.get<{ instance_id: string }>('/whatsapp/accounts/new-instance');
-  return data.instance_id;
-}
-
-export async function createWhatsappAccount(payload: { label: string; instance_id: string; access_token: string }) {
+export async function createWhatsappAccount(payload: { label: string; api_url: string; instance_id: string; access_token: string }) {
   const { data } = await api.post<{ data: WhatsappAccount; qrcode: Record<string, unknown> | null }>('/whatsapp/accounts', payload);
   return data;
 }
@@ -21,7 +16,10 @@ export async function fetchWhatsappQrCode(id: number) {
   return data.qrcode;
 }
 
-export async function updateWhatsappAccount(id: number, payload: { label?: string; access_token?: string; is_active?: boolean }) {
+export async function updateWhatsappAccount(
+  id: number,
+  payload: { label?: string; api_url?: string; instance_id?: string; access_token?: string; is_active?: boolean }
+) {
   const { data } = await api.put<{ data: WhatsappAccount }>(`/whatsapp/accounts/${id}`, payload);
   return data.data;
 }

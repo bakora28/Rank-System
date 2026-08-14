@@ -132,6 +132,7 @@ export interface Teacher {
 export interface WhatsappAccount {
   id: number;
   label: string;
+  api_url: string;
   instance_id: string;
   is_active: boolean;
   created_at: string;

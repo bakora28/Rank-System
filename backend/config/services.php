@@ -43,9 +43,4 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
 
-    'wzila' => [
-        'instance_url' => env('WZILA_INSTANCE_URL', 'https://wzila.com/whatsapp/api/get_instance_id.php'),
-        'api_url' => env('WZILA_API_URL', 'https://apis.wzila.com'),
-    ],
-
 ];

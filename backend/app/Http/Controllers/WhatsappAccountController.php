@@ -22,32 +22,22 @@ class WhatsappAccountController extends Controller
     }
 
     /**
-     * Auto-generates a fresh Wzila instance_id for a new number.
-     */
-    public function newInstance()
-    {
-        try {
-            return response()->json(['instance_id' => $this->whatsApp->createInstanceId()]);
-        } catch (RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 502);
-        }
-    }
-
-    /**
-     * Saves a WhatsApp number using an instance_id (auto-generated via
-     * newInstance()) paired with the admin's Wzila account access_token,
+     * Saves a WhatsApp number using the access parameters (apiUrl, idInstance,
+     * apiTokenInstance) an admin copies from their own GREEN-API console,
      * then returns its QR code so the admin can scan it immediately.
      */
     public function store(Request $request)
     {
         $data = $request->validate([
             'label' => ['required', 'string', 'max:255'],
+            'api_url' => ['required', 'string', 'url', 'max:255'],
             'instance_id' => ['required', 'string'],
             'access_token' => ['required', 'string'],
         ]);
 
         $account = WhatsappAccount::query()->create([
             'label' => $data['label'],
+            'api_url' => rtrim($data['api_url'], '/'),
             'instance_id' => $data['instance_id'],
             'access_token' => $data['access_token'],
             'is_active' => true,
@@ -75,6 +65,8 @@ class WhatsappAccountController extends Controller
     {
         $data = $request->validate([
             'label' => ['sometimes', 'string', 'max:255'],
+            'api_url' => ['sometimes', 'string', 'url', 'max:255'],
+            'instance_id' => ['sometimes', 'string'],
             'access_token' => ['sometimes', 'string'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -94,7 +86,7 @@ class WhatsappAccountController extends Controller
     protected function tryGetQrCode(WhatsappAccount $account): ?array
     {
         try {
-            return $this->whatsApp->getQrCode($account->instance_id, $account->access_token);
+            return $this->whatsApp->getQrCode($account->api_url, $account->instance_id, $account->access_token);
         } catch (RuntimeException) {
             return null;
         }

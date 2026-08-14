@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['label', 'instance_id', 'access_token', 'is_active', 'created_by'])]
+#[Fillable(['label', 'api_url', 'instance_id', 'access_token', 'is_active', 'created_by'])]
 #[Hidden(['access_token'])]
 class WhatsappAccount extends Model
 {

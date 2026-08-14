@@ -8,7 +8,6 @@ import { CheckCircle2, MessageCircle, Phone, Plus, QrCode, Search, Send, Trash2,
 import {
   createWhatsappAccount,
   deleteWhatsappAccount,
-  fetchNewWhatsappInstanceId,
   fetchWhatsappQrCode,
   listWhatsappAccounts,
   sendWhatsappBroadcast,
@@ -47,30 +46,41 @@ function errorMessage(err: unknown, fallback: string) {
   return fallback;
 }
 
-/** Wzila's QR response shape isn't documented — probe common keys defensively. */
+/** GREEN-API returns { type: 'qrCode', message: '<base64 png>' } once authorized-and-pending. */
 function extractQrImageSrc(qrcode: Record<string, unknown> | null): string | null {
-  if (!qrcode) return null;
-  for (const key of ['qrcode', 'qr_code', 'qr', 'image', 'base64', 'data', 'url']) {
-    const value = qrcode[key];
-    if (typeof value === 'string' && value.length > 0) {
-      return value.startsWith('data:') || value.startsWith('http') ? value : `data:image/png;base64,${value}`;
-    }
+  const message = qrcode?.message;
+  if (qrcode?.type === 'qrCode' && typeof message === 'string' && message.length > 0) {
+    return message.startsWith('data:') ? message : `data:image/png;base64,${message}`;
   }
   return null;
+}
+
+function qrStatusMessage(qrcode: Record<string, unknown> | null): string {
+  switch (qrcode?.type) {
+    case 'alreadyLogged':
+      return 'This number is already linked and authorized.';
+    case 'error':
+      return 'The provider returned an error — double-check your access parameters.';
+    case 'passkeyRequired':
+      return 'This instance requires a passkey — set it up in your Green-API console first.';
+    default:
+      return qrcode ? "Couldn't read a QR image from the provider's response." : 'No QR code received yet.';
+  }
 }
 
 function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [label, setLabel] = useState('');
+  const [apiUrl, setApiUrl] = useState('');
+  const [instanceId, setInstanceId] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [qrcode, setQrcode] = useState<Record<string, unknown> | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
 
+  const canCreate = label.trim() && apiUrl.trim() && instanceId.trim() && accessToken.trim();
+
   const createMutation = useMutation({
-    mutationFn: async () => {
-      const instanceId = await fetchNewWhatsappInstanceId();
-      return createWhatsappAccount({ label, instance_id: instanceId, access_token: accessToken });
-    },
+    mutationFn: () => createWhatsappAccount({ label, api_url: apiUrl, instance_id: instanceId, access_token: accessToken }),
     onSuccess: (res) => {
       toast.success('Number created — scan the QR code to link it');
       queryClient.invalidateQueries({ queryKey: ['whatsapp-accounts'] });
@@ -88,6 +98,8 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
 
   function handleClose() {
     setLabel('');
+    setApiUrl('');
+    setInstanceId('');
     setAccessToken('');
     setQrcode(null);
     setAccountId(null);
@@ -112,13 +124,8 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
             <Button variant="secondary" size="sm" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              size="sm"
-              loading={createMutation.isPending}
-              disabled={!label.trim() || !accessToken.trim()}
-              onClick={() => createMutation.mutate()}
-            >
-              Create &amp; Get QR
+            <Button size="sm" loading={createMutation.isPending} disabled={!canCreate} onClick={() => createMutation.mutate()}>
+              Save &amp; Get QR
             </Button>
           </>
         )
@@ -127,14 +134,22 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
       {!accountId ? (
         <div className="flex flex-col gap-4">
           <Input label="Label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. School Front Desk" />
+          <Input
+            label="API URL"
+            value={apiUrl}
+            onChange={(e) => setApiUrl(e.target.value)}
+            placeholder="e.g. https://7105.api.greenapi.com"
+          />
+          <Input label="Instance ID" value={instanceId} onChange={(e) => setInstanceId(e.target.value)} placeholder="idInstance" />
           <PasswordInput
-            label="Wzila access token"
+            label="Access token"
             value={accessToken}
             onChange={(e) => setAccessToken(e.target.value)}
-            placeholder="From your Wzila account"
+            placeholder="apiTokenInstance"
           />
           <p className="text-xs text-slate-400">
-            We'll generate a fresh instance for this number automatically — you just need to paste your Wzila account's access token.
+            Create an instance in your Green-API console, then copy its <span className="font-medium">apiUrl</span>,{' '}
+            <span className="font-medium">idInstance</span>, and <span className="font-medium">apiTokenInstance</span> here.
           </p>
         </div>
       ) : (
@@ -145,9 +160,7 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
           ) : (
             <div className="flex size-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 text-slate-400">
               <QrCode className="size-8" />
-              <p className="max-w-[200px] text-xs">
-                {qrcode ? "Couldn't read a QR image from the provider's response." : 'No QR code received yet.'}
-              </p>
+              <p className="max-w-[200px] text-xs">{qrStatusMessage(qrcode)}</p>
             </div>
           )}
           <Button size="sm" variant="secondary" loading={refreshQrMutation.isPending} onClick={() => refreshQrMutation.mutate()}>

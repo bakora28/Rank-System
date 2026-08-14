@@ -58,7 +58,7 @@ class WhatsappMessageController extends Controller
             }
 
             $chatId = $this->whatsApp->toChatId($teacher->phone);
-            $ok = $this->whatsApp->sendMessage($account->instance_id, $account->access_token, $chatId, $data['message']);
+            $ok = $this->whatsApp->sendMessage($account->api_url, $account->instance_id, $account->access_token, $chatId, $data['message']);
 
             if ($ok) {
                 $sent++;

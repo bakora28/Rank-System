@@ -17,6 +17,7 @@ class WhatsappAccountResource extends JsonResource
         return [
             'id' => $this->id,
             'label' => $this->label,
+            'api_url' => $this->api_url,
             'instance_id' => $this->instance_id,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,

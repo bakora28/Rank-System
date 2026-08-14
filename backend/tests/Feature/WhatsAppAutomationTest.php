@@ -22,56 +22,45 @@ class WhatsAppAutomationTest extends TestCase
         return $admin;
     }
 
-    public function test_admin_can_fetch_a_fresh_instance_id(): void
+    public function test_admin_can_create_a_whatsapp_number_with_its_access_parameters_and_receives_its_qr_code(): void
     {
         Http::fake([
-            'wzila.com/whatsapp/api/get_instance_id.php*' => Http::response([
-                'status' => 'success',
-                'instance_id' => 'inst-123',
+            'https://1234.api.green-api.com/waInstance1234/qr/secret-token-abc' => Http::response([
+                'type' => 'qrCode',
+                'message' => 'FAKEBASE64',
             ]),
-        ]);
-
-        $response = $this->actingAs($this->admin())->getJson('/api/whatsapp/accounts/new-instance');
-
-        $response->assertOk();
-        $response->assertJsonPath('instance_id', 'inst-123');
-    }
-
-    public function test_admin_can_create_a_whatsapp_number_with_its_access_token_and_receives_its_qr_code(): void
-    {
-        Http::fake([
-            'apis.wzila.com/get_qrcode*' => Http::response(['qrcode' => 'data:image/png;base64,FAKE']),
         ]);
 
         $response = $this->actingAs($this->admin())->postJson('/api/whatsapp/accounts', [
             'label' => 'School Main Line',
-            'instance_id' => 'inst-123',
+            'api_url' => 'https://1234.api.green-api.com',
+            'instance_id' => '1234',
             'access_token' => 'secret-token-abc',
         ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.label', 'School Main Line');
-        $response->assertJsonPath('data.instance_id', 'inst-123');
-        $response->assertJsonPath('qrcode.qrcode', 'data:image/png;base64,FAKE');
+        $response->assertJsonPath('data.instance_id', '1234');
+        $response->assertJsonPath('data.api_url', 'https://1234.api.green-api.com');
+        $response->assertJsonPath('qrcode.message', 'FAKEBASE64');
         $response->assertJsonMissingPath('data.access_token');
 
-        Http::assertSent(fn ($request) => str_contains($request->url(), 'get_qrcode')
-            && $request['instance_id'] === 'inst-123'
-            && $request['access_token'] === 'secret-token-abc');
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/waInstance1234/qr/secret-token-abc'));
 
-        $this->assertDatabaseHas('whatsapp_accounts', ['label' => 'School Main Line', 'instance_id' => 'inst-123']);
+        $this->assertDatabaseHas('whatsapp_accounts', ['label' => 'School Main Line', 'instance_id' => '1234']);
     }
 
     public function test_broadcast_send_targets_only_the_requested_subject_and_skips_teachers_without_a_phone(): void
     {
         Http::fake([
-            'apis.wzila.com/send-link*' => Http::response(['status' => 'sent']),
+            'https://1234.api.green-api.com/waInstance1234/sendMessage/tok-1' => Http::response(['idMessage' => 'abc']),
         ]);
 
         $admin = $this->admin();
         $account = WhatsappAccount::query()->create([
             'label' => 'Main',
-            'instance_id' => 'inst-1',
+            'api_url' => 'https://1234.api.green-api.com',
+            'instance_id' => '1234',
             'access_token' => 'tok-1',
             'is_active' => true,
             'created_by' => $admin->id,
@@ -97,10 +86,10 @@ class WhatsAppAutomationTest extends TestCase
         $response->assertJson(['sent' => 1, 'failed' => 0, 'skipped_no_phone' => 1]);
 
         Http::assertSent(function ($request) {
-            return str_contains($request->url(), 'send-link')
-                && str_contains($request->url(), 'chat_id=201012345678%40s.whatsapp.net');
+            return str_contains($request->url(), '/sendMessage/')
+                && $request['chatId'] === '201012345678@c.us';
         });
-        Http::assertNotSent(fn ($request) => str_contains($request->url(), '201098765432'));
+        Http::assertNotSent(fn ($request) => ($request['chatId'] ?? null) === '201098765432@c.us');
     }
 
     public function test_non_admin_cannot_reach_whatsapp_endpoints(): void
