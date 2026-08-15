@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // WhatsApp automation holds live send credentials — admin-only, never delegable.
         Route::get('/whatsapp/accounts', [WhatsappAccountController::class, 'index']);
+        Route::get('/whatsapp/accounts/new-instance', [WhatsappAccountController::class, 'newInstance']);
         Route::post('/whatsapp/accounts', [WhatsappAccountController::class, 'store']);
         Route::get('/whatsapp/accounts/{whatsappAccount}/qrcode', [WhatsappAccountController::class, 'qrcode']);
         Route::put('/whatsapp/accounts/{whatsappAccount}', [WhatsappAccountController::class, 'update']);

@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { toast } from 'sonner';
+import axios from 'axios';
 import { CheckCircle2, MessageCircle, Phone, Plus, QrCode, Search, Send, Trash2, X, XCircle } from 'lucide-react';
 import {
   createWhatsappAccount,
   deleteWhatsappAccount,
+  fetchNewWhatsappInstanceId,
   fetchWhatsappQrCode,
   listWhatsappAccounts,
   sendWhatsappBroadcast,
@@ -20,6 +22,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
@@ -33,6 +36,16 @@ const AUDIENCE_TABS: { value: WhatsappAudience; label: string }[] = [
   { value: 'subject', label: 'By category' },
   { value: 'manual', label: 'Pick manually' },
 ];
+
+function errorMessage(err: unknown, fallback: string) {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string; errors?: Record<string, string[]> } | undefined;
+    if (data?.message) return data.message;
+    const firstFieldError = data?.errors && Object.values(data.errors)[0]?.[0];
+    if (firstFieldError) return firstFieldError;
+  }
+  return fallback;
+}
 
 /** Wzila's QR response shape isn't documented — probe common keys defensively. */
 function extractQrImageSrc(qrcode: Record<string, unknown> | null): string | null {
@@ -49,28 +62,33 @@ function extractQrImageSrc(qrcode: Record<string, unknown> | null): string | nul
 function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [label, setLabel] = useState('');
+  const [accessToken, setAccessToken] = useState('');
   const [qrcode, setQrcode] = useState<Record<string, unknown> | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
 
   const createMutation = useMutation({
-    mutationFn: () => createWhatsappAccount(label),
+    mutationFn: async () => {
+      const instanceId = await fetchNewWhatsappInstanceId();
+      return createWhatsappAccount({ label, instance_id: instanceId, access_token: accessToken });
+    },
     onSuccess: (res) => {
       toast.success('Number created — scan the QR code to link it');
       queryClient.invalidateQueries({ queryKey: ['whatsapp-accounts'] });
       setQrcode(res.qrcode);
       setAccountId(res.data.id);
     },
-    onError: () => toast.error('Could not create a new WhatsApp number.'),
+    onError: (err) => toast.error(errorMessage(err, 'Could not create a new WhatsApp number.')),
   });
 
   const refreshQrMutation = useMutation({
     mutationFn: () => fetchWhatsappQrCode(accountId!),
     onSuccess: (qr) => setQrcode(qr),
-    onError: () => toast.error('Could not refresh the QR code.'),
+    onError: (err) => toast.error(errorMessage(err, 'Could not refresh the QR code.')),
   });
 
   function handleClose() {
     setLabel('');
+    setAccessToken('');
     setQrcode(null);
     setAccountId(null);
     onClose();
@@ -94,7 +112,12 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
             <Button variant="secondary" size="sm" onClick={handleClose}>
               Cancel
             </Button>
-            <Button size="sm" loading={createMutation.isPending} disabled={!label.trim()} onClick={() => createMutation.mutate()}>
+            <Button
+              size="sm"
+              loading={createMutation.isPending}
+              disabled={!label.trim() || !accessToken.trim()}
+              onClick={() => createMutation.mutate()}
+            >
               Create &amp; Get QR
             </Button>
           </>
@@ -102,7 +125,18 @@ function AddNumberModal({ open, onClose }: { open: boolean; onClose: () => void 
       }
     >
       {!accountId ? (
-        <Input label="Label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. School Front Desk" />
+        <div className="flex flex-col gap-4">
+          <Input label="Label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. School Front Desk" />
+          <PasswordInput
+            label="Wzila access token"
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+            placeholder="From your Wzila account"
+          />
+          <p className="text-xs text-slate-400">
+            We'll generate a fresh instance for this number automatically — you just need to paste your Wzila account's access token.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-sm text-slate-600">Open WhatsApp on the phone for this number → Linked Devices → Link a Device, then scan:</p>
@@ -249,7 +283,7 @@ export default function AdminWhatsApp() {
       setResult(res);
       toast.success(`Sent to ${res.sent} teacher${res.sent === 1 ? '' : 's'}`);
     },
-    onError: () => toast.error('Could not send WhatsApp messages.'),
+    onError: (err) => toast.error(errorMessage(err, 'Could not send WhatsApp messages.')),
   });
 
   return (

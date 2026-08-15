@@ -22,25 +22,34 @@ class WhatsappAccountController extends Controller
     }
 
     /**
-     * Creates a brand new Wzila instance for this number and returns it
-     * together with its QR code so the admin can scan it immediately.
+     * Auto-generates a fresh Wzila instance_id for a new number.
+     */
+    public function newInstance()
+    {
+        try {
+            return response()->json(['instance_id' => $this->whatsApp->createInstanceId()]);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
+    }
+
+    /**
+     * Saves a WhatsApp number using an instance_id (auto-generated via
+     * newInstance()) paired with the admin's Wzila account access_token,
+     * then returns its QR code so the admin can scan it immediately.
      */
     public function store(Request $request)
     {
         $data = $request->validate([
             'label' => ['required', 'string', 'max:255'],
+            'instance_id' => ['required', 'string'],
+            'access_token' => ['required', 'string'],
         ]);
-
-        try {
-            $instance = $this->whatsApp->createInstance();
-        } catch (RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 502);
-        }
 
         $account = WhatsappAccount::query()->create([
             'label' => $data['label'],
-            'instance_id' => $instance['instance_id'],
-            'access_token' => $instance['access_token'],
+            'instance_id' => $data['instance_id'],
+            'access_token' => $data['access_token'],
             'is_active' => true,
             'created_by' => $request->user()->id,
         ]);
@@ -66,6 +75,7 @@ class WhatsappAccountController extends Controller
     {
         $data = $request->validate([
             'label' => ['sometimes', 'string', 'max:255'],
+            'access_token' => ['sometimes', 'string'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 

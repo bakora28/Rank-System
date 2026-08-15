@@ -22,18 +22,32 @@ class WhatsAppAutomationTest extends TestCase
         return $admin;
     }
 
-    public function test_admin_can_create_a_whatsapp_number_and_receives_its_qr_code(): void
+    public function test_admin_can_fetch_a_fresh_instance_id(): void
     {
         Http::fake([
             'wzila.com/whatsapp/api/get_instance_id.php*' => Http::response([
+                'status' => 'success',
                 'instance_id' => 'inst-123',
-                'access_token' => 'secret-token-abc',
             ]),
+        ]);
+
+        $response = $this->actingAs($this->admin())->getJson('/api/whatsapp/accounts/new-instance');
+
+        $response->assertOk();
+        $response->assertJsonPath('instance_id', 'inst-123');
+    }
+
+    public function test_admin_can_create_a_whatsapp_number_with_its_access_token_and_receives_its_qr_code(): void
+    {
+        Http::fake([
             'apis.wzila.com/get_qrcode*' => Http::response(['qrcode' => 'data:image/png;base64,FAKE']),
         ]);
 
-        $response = $this->actingAs($this->admin())
-            ->postJson('/api/whatsapp/accounts', ['label' => 'School Main Line']);
+        $response = $this->actingAs($this->admin())->postJson('/api/whatsapp/accounts', [
+            'label' => 'School Main Line',
+            'instance_id' => 'inst-123',
+            'access_token' => 'secret-token-abc',
+        ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.label', 'School Main Line');
@@ -41,7 +55,6 @@ class WhatsAppAutomationTest extends TestCase
         $response->assertJsonPath('qrcode.qrcode', 'data:image/png;base64,FAKE');
         $response->assertJsonMissingPath('data.access_token');
 
-        Http::assertSent(fn ($request) => str_contains($request->url(), 'get_instance_id.php'));
         Http::assertSent(fn ($request) => str_contains($request->url(), 'get_qrcode')
             && $request['instance_id'] === 'inst-123'
             && $request['access_token'] === 'secret-token-abc');

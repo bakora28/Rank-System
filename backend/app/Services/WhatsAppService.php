@@ -8,12 +8,13 @@ use RuntimeException;
 class WhatsAppService
 {
     /**
-     * Calls Wzila's instance-creation endpoint and returns the fresh
-     * [instance_id, access_token] pair for a brand new WhatsApp number.
+     * Calls Wzila's instance-creation endpoint and returns a fresh instance_id.
      *
-     * @return array{instance_id: string, access_token: string}
+     * Despite the docs listing `access_token` as part of this response too,
+     * in practice this endpoint only returns `instance_id` — the access
+     * token is an account-level credential the admin supplies themselves.
      */
-    public function createInstance(): array
+    public function createInstanceId(): string
     {
         $response = Http::timeout(15)->get(config('services.wzila.instance_url'));
 
@@ -21,15 +22,13 @@ class WhatsAppService
             throw new RuntimeException('Could not reach the WhatsApp provider to create a new instance.');
         }
 
-        $data = $response->json();
-        $instanceId = $data['instance_id'] ?? null;
-        $accessToken = $data['access_token'] ?? null;
+        $instanceId = $response->json('instance_id');
 
-        if (! $instanceId || ! $accessToken) {
-            throw new RuntimeException('The WhatsApp provider did not return an instance_id/access_token.');
+        if (! $instanceId) {
+            throw new RuntimeException('The WhatsApp provider did not return an instance_id.');
         }
 
-        return ['instance_id' => $instanceId, 'access_token' => $accessToken];
+        return $instanceId;
     }
 
     /**
