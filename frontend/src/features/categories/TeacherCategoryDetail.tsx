@@ -34,59 +34,42 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
   const color = book.category?.color ?? '#2f8fe0';
 
   return (
-    <div className="flex aspect-[210/297] w-full">
-      {/* Spine */}
-      <div
-        className="relative w-3.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,rgba(0,0,0,0.12)_0px,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_4px)] shadow-[inset_-3px_0_4px_rgba(0,0,0,0.25)]"
-        style={{ background: `color-mix(in srgb, ${color} 65%, #0f172a)` }}
-      />
+    <button
+      type="button"
+      onClick={onOpen}
+      disabled={!hasFiles}
+      className="group relative block aspect-[210/297] w-full overflow-hidden disabled:cursor-default"
+    >
+      {cover ? (
+        <img
+          src={cover.url}
+          alt={book.name}
+          className="h-full w-full object-cover object-top transition-transform duration-300 group-enabled:group-hover:scale-105"
+        />
+      ) : (
+        <div
+          className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"
+          style={{ background: `linear-gradient(150deg, ${color}, color-mix(in srgb, ${color} 55%, #0f172a))` }}
+        >
+          <BookOpen className="size-7 text-white/60" />
+          <p className="line-clamp-3 font-serif text-sm font-semibold leading-snug text-white/90">{book.name}</p>
+        </div>
+      )}
 
-      {/* Cover */}
-      <button
-        type="button"
-        onClick={onOpen}
-        disabled={!hasFiles}
-        className="group relative block flex-1 overflow-hidden shadow-[inset_3px_0_6px_rgba(0,0,0,0.15)] disabled:cursor-default"
-      >
-        {cover ? (
-          <>
-            <img
-              src={cover.url}
-              alt={book.name}
-              className="h-full w-full object-cover object-top transition-transform duration-300 group-enabled:group-hover:scale-105"
-            />
-            {/* Subtle depth + glossy-cover finish */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/10" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.22)_0%,transparent_28%)]" />
-          </>
-        ) : (
-          <div
-            className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"
-            style={{ background: `linear-gradient(150deg, ${color}, color-mix(in srgb, ${color} 55%, #0f172a))` }}
-          >
-            <BookOpen className="size-7 text-white/60" />
-            <p className="line-clamp-3 font-serif text-sm font-semibold leading-snug text-white/90">{book.name}</p>
-          </div>
-        )}
+      {hasFiles && <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/10" />}
 
-        {hasFiles && <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/10" />}
+      {images.length > 1 && (
+        <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
+          +{images.length - 1}
+        </span>
+      )}
 
-        {images.length > 1 && (
-          <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
-            +{images.length - 1}
-          </span>
-        )}
-
-        {pdfs.length > 0 && (
-          <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm">
-            <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length} PDFs` : 'PDF'}
-          </span>
-        )}
-      </button>
-
-      {/* Page edge */}
-      <div className="w-1.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,#e2e8f0_0px,#e2e8f0_2px,#f8fafc_2px,#f8fafc_3px)]" />
-    </div>
+      {pdfs.length > 0 && (
+        <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm">
+          <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length} PDFs` : 'PDF'}
+        </span>
+      )}
+    </button>
   );
 }
 
