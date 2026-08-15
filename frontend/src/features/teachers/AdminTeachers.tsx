@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Download, Plus, Search, Trash2, UserRound } from 'lucide-react';
+import { Download, Pencil, Plus, Search, Trash2, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { createTeacher, deleteTeacher, exportTeachers, listTeachers, updateTeacher } from '@/api/teachers';
@@ -50,6 +50,22 @@ export default function AdminTeachers() {
   const [deleting, setDeleting] = useState<Teacher | null>(null);
   const [exporting, setExporting] = useState(false);
 
+  const [editing, setEditing] = useState<Teacher | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editSubject, setEditSubject] = useState<Subject | null>(null);
+  const [editError, setEditError] = useState('');
+
+  function openEdit(teacher: Teacher) {
+    setEditing(teacher);
+    setEditName(teacher.name);
+    setEditEmail(teacher.email);
+    setEditPhone(teacher.phone ?? '');
+    setEditSubject(teacher.subject);
+    setEditError('');
+  }
+
   async function handleExport() {
     setExporting(true);
     try {
@@ -94,6 +110,28 @@ export default function AdminTeachers() {
     mutationFn: (t: Teacher) => updateTeacher(t.id, { name: t.name, email: t.email, is_active: !t.is_active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: () =>
+      updateTeacher(editing!.id, {
+        name: editName,
+        email: editEmail,
+        phone: editPhone || null,
+        subject: editSubject ?? undefined,
+      }),
+    onSuccess: () => {
+      toast.success('Teacher updated');
+      queryClient.invalidateQueries({ queryKey: ['teachers'] });
+      setEditing(null);
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err) && err.response?.status === 422) {
+        setEditError(Object.values(err.response.data.errors as Record<string, string[]>)[0]?.[0] ?? 'Invalid data');
+      } else {
+        setEditError('Could not update teacher.');
+      }
     },
   });
 
@@ -191,6 +229,14 @@ export default function AdminTeachers() {
                     <Badge tone={teacher.is_active ? 'default' : 'danger'}>{teacher.is_active ? 'Active' : 'Deactivated'}</Badge>
                   </button>
                 )}
+                {can('teachers.edit') && (
+                  <button
+                    onClick={() => openEdit(teacher)}
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                  >
+                    <Pencil className="size-3.5" />
+                  </button>
+                )}
                 {can('teachers.delete') && (
                   <button onClick={() => setDeleting(teacher)} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-danger cursor-pointer">
                     <Trash2 className="size-3.5" />
@@ -231,6 +277,35 @@ export default function AdminTeachers() {
           <SubjectPicker value={subject} onChange={setSubject} />
           <Input label="Temporary password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {formError && <p className="text-sm text-danger">{formError}</p>}
+        </div>
+      </Modal>
+
+      <Modal
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={`Edit Teacher — ${editing?.name}`}
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={() => setEditing(null)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              loading={editMutation.isPending}
+              disabled={!editName.trim() || !editEmail.trim() || !isPhoneFieldValid(editPhone)}
+              onClick={() => editMutation.mutate()}
+            >
+              Save
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <Input label="Full name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+          <Input label="Email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+          <PhoneField value={editPhone} onChange={setEditPhone} />
+          <SubjectPicker value={editSubject} onChange={setEditSubject} />
+          {editError && <p className="text-sm text-danger">{editError}</p>}
         </div>
       </Modal>
 
