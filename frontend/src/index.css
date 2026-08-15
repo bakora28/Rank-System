@@ -2,6 +2,16 @@
 
 @theme {
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-baloo: "Baloo 2", "Inter", system-ui, sans-serif;
+
+  --color-poppy-50: #fdf1e6;
+  --color-poppy-100: #fbe4d4;
+  --color-poppy-200: #f8d0c3;
+  --color-poppy-300: #f6a9ac;
+  --color-poppy-400: #f37e8a;
+  --color-poppy-500: #ee6377;
+  --color-poppy-600: #de4f68;
+  --color-poppy-700: #b83a52;
 
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;

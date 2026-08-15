@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Check, ChevronLeft, ChevronRight, Clock, FileText, ImageOff, Receipt, Upload, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, ChevronLeft, ChevronRight, Clock, FileText, Flower2, ImageOff, Receipt, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { listBooks } from '@/api/categories';
 import { markBookBought } from '@/api/purchaseRequests';
@@ -287,12 +287,19 @@ export default function TeacherCategoryDetail() {
   });
 
   return (
-    <div>
-      <Link to="/teacher/categories" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">
+    <div className="rounded-3xl bg-poppy-50 p-6 sm:p-8">
+      <Link to="/teacher/categories" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-poppy-700/70 hover:text-poppy-700">
         <ArrowLeft className="size-4" /> Back to categories
       </Link>
 
-      <h1 className="text-2xl font-bold text-slate-800">{data?.[0]?.category?.name ?? 'Books'}</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="font-[family-name:var(--font-baloo)] text-3xl font-bold text-poppy-600">{data?.[0]?.category?.name ?? 'Books'}</h1>
+        <div className="flex items-center gap-1 text-poppy-300">
+          <Flower2 className="size-4" />
+          <Flower2 className="size-3" />
+          <Flower2 className="size-2.5" />
+        </div>
+      </div>
 
       {isLoading && <Spinner />}
 
@@ -304,11 +311,13 @@ export default function TeacherCategoryDetail() {
           const Icon = meta?.icon;
           return (
             <motion.div key={book.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
-              <Card className="flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover">
+              <Card className="flex flex-col overflow-hidden border-poppy-100 bg-white shadow-[0_2px_10px_rgba(238,99,119,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(238,99,119,0.18)]">
                 <BookCover book={book} onOpen={() => setViewing(book)} />
                 <div className="flex flex-1 flex-col gap-2.5 p-3.5">
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm font-medium leading-snug text-slate-700">{book.name}</p>
+                    <p className="line-clamp-2 font-[family-name:var(--font-baloo)] text-sm font-semibold leading-snug text-poppy-700">
+                      {book.name}
+                    </p>
                     {meta && (
                       <Badge tone={meta.tone} className="mt-2">
                         {Icon && <Icon className="size-3.5" />} {meta.label}
@@ -316,7 +325,11 @@ export default function TeacherCategoryDetail() {
                     )}
                   </div>
                   {!book.my_status && (
-                    <Button size="sm" className="w-full" onClick={() => setMarking(book)}>
+                    <Button
+                      size="sm"
+                      className="w-full !rounded-full !bg-poppy-500 shadow-sm shadow-poppy-500/30 hover:!bg-poppy-600"
+                      onClick={() => setMarking(book)}
+                    >
                       Mark bought
                     </Button>
                   )}
