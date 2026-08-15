@@ -50,11 +50,11 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
         </div>
       ) : (
         <div
-          className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"
+          className="flex h-full w-full flex-col items-center justify-center gap-1.5 p-2.5 text-center"
           style={{ background: `linear-gradient(150deg, ${color}, color-mix(in srgb, ${color} 55%, #0f172a))` }}
         >
           <BookOpen className="size-7 text-white/60" />
-          <p className="line-clamp-3 font-serif text-sm font-semibold leading-snug text-white/90">{book.name}</p>
+          <p className="line-clamp-4 font-serif text-sm font-semibold leading-snug text-white/90">{book.name}</p>
         </div>
       )}
 
@@ -68,7 +68,7 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
 
       {pdfs.length > 0 && (
         <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm">
-          <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length} PDFs` : 'PDF'}
+          <FileText className="size-3 text-danger" /> {pdfs.length > 1 ? `${pdfs.length}` : 'PDF'}
         </span>
       )}
     </button>
@@ -298,25 +298,25 @@ export default function TeacherCategoryDetail() {
 
       {!isLoading && data && data.length === 0 && <EmptyState icon={<BookOpen className="size-8" />} title="No books yet in this category" />}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(220px,260px))] gap-6">
         {data?.map((book, i) => {
           const meta = book.my_status ? STATUS_META[book.my_status] : null;
           const Icon = meta?.icon;
           return (
-            <motion.div key={book.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <Card className="flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover">
+            <motion.div key={book.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+              <Card className="flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover">
                 <BookCover book={book} onOpen={() => setViewing(book)} />
-                <div className="flex items-center justify-between gap-3 p-4">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-700">{book.name}</p>
+                <div className="flex flex-1 flex-col gap-2.5 p-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-sm font-medium leading-snug text-slate-700">{book.name}</p>
                     {meta && (
-                      <Badge tone={meta.tone} className="mt-1.5">
-                        {Icon && <Icon className="size-3" />} {meta.label}
+                      <Badge tone={meta.tone} className="mt-2">
+                        {Icon && <Icon className="size-3.5" />} {meta.label}
                       </Badge>
                     )}
                   </div>
                   {!book.my_status && (
-                    <Button size="sm" onClick={() => setMarking(book)}>
+                    <Button size="sm" className="w-full" onClick={() => setMarking(book)}>
                       Mark bought
                     </Button>
                   )}
