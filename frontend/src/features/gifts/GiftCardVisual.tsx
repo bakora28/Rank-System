@@ -22,12 +22,21 @@ export function GiftCardVisual({ gift, index = 0 }: { gift: Gift; index?: number
       transition={{ delay: index * 0.08, type: 'spring', bounce: 0.3 }}
       whileHover={{ y: -6, rotate: 0.5 }}
       className={clsx(
-        'relative flex h-36 w-full shrink-0 flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br p-4 text-white shadow-lg',
-        PALETTES[index % PALETTES.length]
+        'relative flex h-36 w-full shrink-0 flex-col justify-between overflow-hidden rounded-2xl p-4 text-white shadow-lg',
+        !gift.image_url && ['bg-gradient-to-br', PALETTES[index % PALETTES.length]]
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_45%)]" />
-      <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-white/10 blur-xl" />
+      {gift.image_url ? (
+        <>
+          <img src={gift.image_url} alt={gift.name} className="absolute inset-0 h-full w-full object-cover object-top" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/10" />
+        </>
+      ) : (
+        <>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_45%)]" />
+          <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-white/10 blur-xl" />
+        </>
+      )}
 
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex size-8 items-center justify-center rounded-lg bg-white/25 backdrop-blur-sm">
