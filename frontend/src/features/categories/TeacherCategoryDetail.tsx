@@ -41,11 +41,13 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
       className="group relative block aspect-[210/297] w-full overflow-hidden disabled:cursor-default"
     >
       {cover ? (
-        <img
-          src={cover.url}
-          alt={book.name}
-          className="h-full w-full object-cover object-top transition-transform duration-300 group-enabled:group-hover:scale-105"
-        />
+        <div className="flex h-full w-full items-center justify-center bg-slate-100">
+          <img
+            src={cover.url}
+            alt={book.name}
+            className="h-full w-full object-contain transition-transform duration-300 group-enabled:group-hover:scale-105"
+          />
+        </div>
       ) : (
         <div
           className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-4 text-center"

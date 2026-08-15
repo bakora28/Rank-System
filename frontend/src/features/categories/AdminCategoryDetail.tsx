@@ -207,7 +207,7 @@ export default function AdminCategoryDetail() {
                           <span className="line-clamp-3 text-[10px] leading-tight text-slate-500">{file.name}</span>
                         </div>
                       ) : (
-                        <img src={file.url} alt={file.name} className="h-full w-full object-cover object-top" />
+                        <img src={file.url} alt={file.name} className="h-full w-full object-contain" />
                       )}
                     </a>
                     <button
@@ -227,7 +227,7 @@ export default function AdminCategoryDetail() {
                   title={`${pending.file.name} · ${formatSize(pending.file.size)}`}
                 >
                   {pending.previewUrl ? (
-                    <img src={pending.previewUrl} alt={pending.file.name} className="h-full w-full object-cover object-top" />
+                    <img src={pending.previewUrl} alt={pending.file.name} className="h-full w-full object-contain" />
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 p-2 text-center">
                       <FileText className="size-6 shrink-0 text-danger" />
