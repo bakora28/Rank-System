@@ -298,7 +298,7 @@ export default function TeacherCategoryDetail() {
 
       {!isLoading && data && data.length === 0 && <EmptyState icon={<BookOpen className="size-8" />} title="No books yet in this category" />}
 
-      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(220px,260px))] gap-6">
+      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(280px,330px))] gap-6">
         {data?.map((book, i) => {
           const meta = book.my_status ? STATUS_META[book.my_status] : null;
           const Icon = meta?.icon;
