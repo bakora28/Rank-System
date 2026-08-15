@@ -34,7 +34,7 @@ function BookCover({ book, onOpen }: { book: Book; onOpen: () => void }) {
   const color = book.category?.color ?? '#2f8fe0';
 
   return (
-    <div className="flex aspect-[4/3] w-full">
+    <div className="flex aspect-[210/297] w-full">
       {/* Spine */}
       <div
         className="relative w-3.5 shrink-0 bg-[image:repeating-linear-gradient(180deg,rgba(0,0,0,0.12)_0px,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_4px)] shadow-[inset_-3px_0_4px_rgba(0,0,0,0.25)]"
@@ -122,7 +122,7 @@ function BookGalleryModal({ book, onClose }: { book: Book; onClose: () => void }
 
           {images.length > 0 ? (
             <div className="relative bg-slate-50">
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-[210/297] w-full overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={active?.id}
