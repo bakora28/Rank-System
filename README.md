@@ -10,7 +10,7 @@ A gamified book-purchase competition platform for schools. Teachers "buy" books 
 **Teachers**
 - Sign up (with phone number and a Maths/Science subject choice) / log in with email+password or Google
 - Browse book categories scoped to their own subject — Maths teachers see Maths; Science teachers see General Science, Chemistry, Physics, and Biology
-- Books are shown as book-shaped cards (spine, cover art, page edge) with cover images and attached PDFs uploaded by admin, viewable in a gallery
+- Books are shown as cover cards (full uncropped cover image, A4 proportions) with attached PDFs uploaded by admin, viewable in a gallery
 - Mark a book as "bought": upload a purchase receipt (image or PDF) with an optional note, creating a pending request
 - **My Requests** page — full history of every request they've made and its outcome (pending / approved / rejected), with the receipt and any admin note
 - See a live top-10 leaderboard scoped to their own subject (day / month / year / all-time), plus their own position if outside the top 10
@@ -21,10 +21,11 @@ A gamified book-purchase competition platform for schools. Teachers "buy" books 
 - Full ranking of every teacher by approved book purchases, shown as two side-by-side tables (Maths / Science)
 - Review purchase requests — view the teacher's uploaded receipt and note before approving or rejecting, with a Pending/All-history/Approved/Rejected tab switcher and search/filter by teacher, book, category, date
 - Full CRUD on categories (grouped by Maths/Science subject; seeded: Maths, General Science, Chemistry, Physics, Biology) and their books, with multi-file image/PDF attachments per book
-- Manage teacher accounts (including phone numbers and subject), with a subject filter and a one-click export of the full roster to an Excel (.xlsx) sheet
+- Manage teacher accounts (add, edit, including phone numbers and subject), with a subject filter and a one-click export of the full roster to an Excel (.xlsx) sheet
 - Manage **assistants** — admin-created accounts with a granular, per-module permission matrix (view/add/edit/delete across categories, books, teachers, requests, gifts, notifications)
 - Manage **other admins** — full-access accounts, admin-only, self-deletion blocked
-- Manage gifts: iPhone & Smart Watch (manually awarded, criteria admin's choice), Smartboard (auto-awarded to the top teacher at year end), iPad (auto-awarded to the top teacher each term / 6 months) — every gift's criteria is editable
+- Manage gifts: iPhone & Smart Watch (manually awarded, criteria admin's choice), Smartboard (auto-awarded to the top teacher at year end), iPad (auto-awarded to the top teacher each term / 6 months) — every gift's criteria is editable, with an optional image shown to teachers
+- **WhatsApp automation** (admin-only) — connect one or more WhatsApp numbers via [Green-API](https://green-api.com), pick recipients by subject or manually/by search, write a custom message, and send in bulk
 - Notification bell for purchase-request activity
 
 **Assistants**
@@ -124,3 +125,4 @@ Every other admin, assistant, or teacher account can then be created from the ad
 - Assistant permissions are assigned individually (not role-shared), so two assistants can have completely different access.
 - Rank is computed live from approved purchase requests — not cached — filterable by day/month/year/all-time.
 - The app runs on `Africa/Cairo` time (`APP_TIMEZONE` in `backend/.env`), which drives the leaderboard's period boundaries and the gift-award scheduler's term/year windows.
+- WhatsApp automation needs no `.env` setup — an admin adds a number (label, [Green-API](https://green-api.com) instance ID, API URL, access token) from the admin dashboard and scans the resulting QR code; credentials are stored encrypted in the database.
